@@ -1,10 +1,10 @@
 using System.Text.RegularExpressions;
 
-namespace WowWtfSync
+namespace WowWtfSync.WindowsApp
 {
     public partial class wowWtfSyncForm : Form
     {
-        private List<string> characterDirs;
+        private List<string> characterDirs; // Full paths of character dirs in all accounts
 
         public wowWtfSyncForm()
         {
@@ -12,34 +12,56 @@ namespace WowWtfSync
             this.characterDirs = new List<string>();
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void addCharacterButton_Click(object sender, EventArgs e)
         {
+            string selectedAccount = accountsList.SelectedItem?.ToString();
+            string selectedCharacter = charactersList.SelectedItem?.ToString();
 
-        }
+            string errorMessage = "";
+            if (selectedAccount == null)
+                errorMessage = "Please select an account.";
+            else if (selectedCharacter == null)
+                errorMessage = "Please select a character.";
 
-        private void label1_Click(object sender, EventArgs e)
-        {
+            if (!string.IsNullOrEmpty(errorMessage))
+            {
+                MessageBox.Show(
+                    errorMessage,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                return;
+            }
 
-        }
+            string[] selectedCharacterSplit = selectedCharacter.Split('-');
+            string selectedCharacterName = selectedCharacterSplit[0];
+            string selectedRealm = selectedCharacterSplit[1];
+            AddedCharacter? previouslyAddedChar = addedCharactersPanel.addedCharacters.Find(
+                (AddedCharacter addedChar) => selectedCharacterName == addedChar.characterName &&
+                    selectedRealm == addedChar.realm
+            );
+            bool charIsAlreadyAdded = previouslyAddedChar != null;
+            if (charIsAlreadyAdded)
+            {
+                bool charIsAddedToSelectedAccount = previouslyAddedChar.account.Equals(selectedAccount);
+                if (charIsAddedToSelectedAccount)
+                    errorMessage = "The selected character has already been added.";
+                else
+                    errorMessage = "The selected character has already been added to a " +
+                        "different account. Please remove it first.";
 
-        private void label2_Click(object sender, EventArgs e)
-        {
+                MessageBox.Show(
+                    errorMessage,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
 
-        }
+                return;
+            }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-
+            addedCharactersPanel.AddCharacter(selectedCharacterName, selectedRealm, selectedAccount);
         }
 
         private void scanButton_Click(object sender, EventArgs e)
@@ -71,11 +93,6 @@ namespace WowWtfSync
             }
 
             // Update the accounts list and clear the characters list
-            this.RefreshAccounts();
-        }
-
-        private void RefreshAccounts()
-        {
             Dictionary<string, List<string>> accountToCharactersDict =
                 GetAccountToCharactersDict();
             List<string> accountsList = accountToCharactersDict.Keys.ToList();
@@ -85,6 +102,9 @@ namespace WowWtfSync
             {
                 this.accountsList.Items.Add(account);
             }
+
+            // Notify the added characters panel of the most recent WTF location
+            addedCharactersPanel.wtfAccountDir = wtfAccountDir;
         }
 
         private void accountsList_SelectedIndexChanged(object sender, EventArgs e)
