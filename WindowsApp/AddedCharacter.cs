@@ -73,12 +73,16 @@ namespace WowWtfSync.WindowsApp
                 using (Process process = new Process())
                 {
                     List<string> argList = new List<string>();
-                    argList.Add(@"C:\Users\brand\source\repos\WowWtfSync\push.lua");
-                    argList.Add(parentPanel.wtfAccountDir);
+                    argList.Add('"' + @"C:\Users\brand\source\repos\WowWtfSync\push.lua" + '"');
+                    argList.Add('"' + parentPanel.wtfAccountDir + '"');
+                    argList.Add(this.characterName);
+                    argList.Add(this.realm);
+                    argList.Add(this.account);
                     argList.Add("Bagnon");
 
                     process.StartInfo.UseShellExecute = false;
                     process.StartInfo.FileName = @"C:\Users\brand\source\repos\WowWtfSync\LuaApp\lua-5.4.2\lua54.exe";
+                    process.StartInfo.WorkingDirectory = @"C:\Users\brand\source\repos\WowWtfSync";
                     process.StartInfo.Arguments = String.Join(' ', argList.ToArray());
                     process.StartInfo.CreateNoWindow = true;
                     process.StartInfo.RedirectStandardOutput = true;
