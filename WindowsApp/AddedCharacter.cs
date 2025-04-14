@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Diagnostics;
 
 namespace WowWtfSync.WindowsApp
@@ -72,17 +73,20 @@ namespace WowWtfSync.WindowsApp
             {
                 using (Process process = new Process())
                 {
+                    string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+
                     List<string> argList = new List<string>();
-                    argList.Add('"' + @"C:\Users\brand\source\repos\WowWtfSync\push.lua" + '"');
+                    argList.Add('"' + @".\push.lua" + '"');
                     argList.Add('"' + parentPanel.wtfAccountDir + '"');
                     argList.Add(this.characterName);
                     argList.Add(this.realm);
                     argList.Add(this.account);
                     argList.Add("Bagnon");
+                    argList.Add('"' + Path.Combine(workingDirectory, "config.json") + '"');
 
                     process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.FileName = @"C:\Users\brand\source\repos\WowWtfSync\LuaApp\lua-5.4.2\lua54.exe";
-                    process.StartInfo.WorkingDirectory = @"C:\Users\brand\source\repos\WowWtfSync";
+                    process.StartInfo.FileName = workingDirectory + @"\LuaApp\lua-5.4.2\lua54.exe";
+                    process.StartInfo.WorkingDirectory = workingDirectory;
                     process.StartInfo.Arguments = String.Join(' ', argList.ToArray());
                     process.StartInfo.CreateNoWindow = true;
                     process.StartInfo.RedirectStandardOutput = true;

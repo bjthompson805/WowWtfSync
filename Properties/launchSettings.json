@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "WowWtfSync": {
+      "commandName": "Project",
+      "workingDirectory": "C:\\Users\\brand\\source\\repos\\WowWtfSync"
+    }
+  }
+}

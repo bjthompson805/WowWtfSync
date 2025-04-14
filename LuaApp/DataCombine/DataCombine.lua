@@ -8,7 +8,7 @@ function DataCombine:new()
     return object
 end
 
-function DataCombine:combine(wtfAccountDir, characterName, realm, account, addonName)
+function DataCombine:combine(wtfAccountDir, characterName, realm, account, addonName, jsonConfig)
     if (addonName == "Bagnon") then
         -- Evaluate the source BagBrother file
         local bagBrotherPath = wtfAccountDir .. "\\" .. account .. "\\SavedVariables\\BagBrother.lua"
@@ -16,19 +16,38 @@ function DataCombine:combine(wtfAccountDir, characterName, realm, account, addon
         bagBrotherFn()
         local sourceBrotherBags = BrotherBags
 
-        -- Evaluate the destination BagBrother file
-        -- DEBUG: Hardcode the destination
-        bagBrotherPath = wtfAccountDir .. "\\61058156#1\\SavedVariables\\BagBrother.lua"
-        bagBrotherFn = assert(loadfile(bagBrotherPath))
-        bagBrotherFn()
-        local destBrotherBags = BrotherBags
+        -- Get all unique accounts listed in the config
+        local fh = io.open(jsonConfig, "r")
+        if fh == nil then
+            self.errorMsg = "Could not open file '" .. jsonConfig .. "'"
+            return false
+        end
+        local jsonConfigContent = fh:read("*all")
+        fh:close()
+        local json = require 'json'
+        local configTable = json.decode(jsonConfigContent)
+        local uniqueAccounts = {}
+        for _, character in ipairs(configTable) do
+            uniqueAccounts[character.Account] = true
+        end
+        uniqueAccounts[account] = nil -- Remove the current account
 
-        -- Combine
-        destBrotherBags[realm][characterName] = sourceBrotherBags[realm][characterName]
+        for account in pairs(uniqueAccounts) do
+            -- Evaluate the destination BagBrother file
+            bagBrotherPath = wtfAccountDir .. "\\" .. account .. "\\SavedVariables\\BagBrother.lua"
+            bagBrotherFn = assert(loadfile(bagBrotherPath))
+            bagBrotherFn()
+            local destBrotherBags = BrotherBags
 
-        -- Save file
-        self:printTable(destBrotherBags, bagBrotherPath, "BrotherBags")
+            -- Combine
+            destBrotherBags[realm][characterName] = sourceBrotherBags[realm][characterName]
+
+            -- Save file
+            self:printTable(destBrotherBags, bagBrotherPath, "BrotherBags")
+        end
     end
+
+    return true
 end
 
 --[[

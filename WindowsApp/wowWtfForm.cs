@@ -1,3 +1,5 @@
+using System.Diagnostics;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 
 namespace WowWtfSync.WindowsApp
@@ -9,7 +11,28 @@ namespace WowWtfSync.WindowsApp
         public wowWtfSyncForm()
         {
             InitializeComponent();
+            this.InitializeApplication();
             this.characterDirs = new List<string>();
+        }
+
+        private void InitializeApplication()
+        {
+            string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            string jsonFile = Path.Combine(workingDirectory, "config.json");
+            if (File.Exists(jsonFile))
+            {
+                string jsonString = File.ReadAllText(jsonFile);
+                var dtoList = JsonSerializer.Deserialize<List<AddedCharacterDto>>(jsonString);
+                if (dtoList != null)
+                {
+                    foreach (var dto in dtoList)
+                    {
+                        addedCharactersPanel.AddCharacter(dto.CharacterName, dto.Realm, dto.Account);
+                    }
+                }
+            }
+            string wtfAccountDir = wowWtfFolderTextbox.Text + "\\Account";
+            addedCharactersPanel.wtfAccountDir = wtfAccountDir;
         }
 
         private void addCharacterButton_Click(object sender, EventArgs e)
