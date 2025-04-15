@@ -30,10 +30,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="LuaApp\DataCombine\DataCombine.lua">
+    <None Update="LuaApp\lib\DataCombine\DataCombine.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="LuaApp\lib\json.lua">
+    <None Update="LuaApp\lib\DataCombine\DataCombineBagnon.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LuaApp\lib\DataCombine\DataCombineFactory.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LuaApp\lua_modules\30log.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LuaApp\lua_modules\json.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="LuaApp\lua-5.4.2\lua54.dll">
@@ -46,6 +55,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="LuaApp\lua-5.4.2\wlua54.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LuaApp\lua_modules\requireNested.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Properties\Settings.settings">

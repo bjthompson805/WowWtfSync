@@ -1,7 +1,9 @@
 
-package.path = package.path .. ";.\\LuaApp\\lib\\?.lua"
+-- Set path of 3rd party packages (lua_modules) and our modules (lib).
+package.path = package.path .. ";.\\LuaApp\\lua_modules\\?.lua;.\\LuaApp\\lib\\?.lua"
 
-require ".\\LuaApp\\DataCombine\\DataCombine"
+require "requireNested" -- Allow for instantiation of modules in nested directories
+require "DataCombine.DataCombineFactory"
 
 if (#arg ~= 6) then
     error("USAGE: " .. arg[0] .. " <wtfAccountDir> <characterName> <realm> <account> <addonName> <jsonConfig>")
@@ -14,7 +16,7 @@ local realm = arg[3]
 local account = arg[4]
 local addonName = arg[5]
 local jsonConfig = arg[6]
-local dataCombineObj = DataCombine:new()
+local dataCombineObj = DataCombine.DataCombineFactory:create(addonName)
 if (
     dataCombineObj:combine(
         wtfAccountDir,
@@ -34,6 +36,6 @@ if (
         account
     ))
 else
-    error("DataCombine:combine() failed: " .. dataCombineObj.errorMsg)
+    error(dataCombineObj.name .. ":combine() failed: " .. dataCombineObj.errorMsg)
     os.exit(1)
 end
