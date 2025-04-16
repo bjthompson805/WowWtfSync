@@ -65,6 +65,7 @@ namespace WowWtfSync.WindowsApp
         private void RemoveCharacterButton_Click(object sender, EventArgs e)
         {
             this.parentPanel.RemoveCharacter(this);
+            this.parentPanel.SaveAddedCharacters();
         }
 
         private void PushCharacterButton_Click(object sender, EventArgs e)

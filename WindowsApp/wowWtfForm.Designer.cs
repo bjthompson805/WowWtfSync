@@ -46,7 +46,6 @@
             wowWtfFolderTextbox.Name = "wowWtfFolderTextbox";
             wowWtfFolderTextbox.Size = new Size(886, 39);
             wowWtfFolderTextbox.TabIndex = 0;
-            wowWtfFolderTextbox.Text = "C:\\Program Files (x86)\\World of Warcraft\\_classic_era_\\WTF";
             // 
             // label1
             // 

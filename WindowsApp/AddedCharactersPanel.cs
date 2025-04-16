@@ -20,30 +20,27 @@ namespace WowWtfSync.WindowsApp
             AddedCharacter addedCharacter = new AddedCharacter(characterName, realm, account, this);
             this.addedCharacters.Add(addedCharacter);
             this.Controls.Add(addedCharacter);
-            this.SaveAddedCharacters();
         }
 
         public void RemoveCharacter(AddedCharacter addedCharacter)
         {
             this.addedCharacters.Remove(addedCharacter);
             this.Controls.Remove(addedCharacter);
-            this.SaveAddedCharacters();
         }
 
-        private void SaveAddedCharacters()
+        public void SaveAddedCharacters()
         {
-            string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            string jsonFile = Path.Combine(workingDirectory, "config.json");
-
             // Map and serialize
-            var dtoList = this.addedCharacters.Select(ac => new AddedCharacterDto
-            {
-                CharacterName = ac.characterName,
-                Realm = ac.realm,
-                Account = ac.account
-            }).ToList();
-            string jsonString = JsonSerializer.Serialize(dtoList);
-            File.WriteAllText(jsonFile, jsonString);
+            List<AddedCharacterDto> addedCharactersDtoList = this.addedCharacters.Select(
+                ac => new AddedCharacterDto
+                {
+                    CharacterName = ac.characterName,
+                    Realm = ac.realm,
+                    Account = ac.account
+                }
+            ).ToList();
+            JsonConfigFile.addedCharacters = addedCharactersDtoList;
+            JsonConfigFile.Save();
         }
     }
 }

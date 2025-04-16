@@ -17,22 +17,19 @@ namespace WowWtfSync.WindowsApp
 
         private void InitializeApplication()
         {
-            string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            string jsonFile = Path.Combine(workingDirectory, "config.json");
-            if (File.Exists(jsonFile))
-            {
-                string jsonString = File.ReadAllText(jsonFile);
-                var dtoList = JsonSerializer.Deserialize<List<AddedCharacterDto>>(jsonString);
-                if (dtoList != null)
-                {
-                    foreach (var dto in dtoList)
-                    {
-                        addedCharactersPanel.AddCharacter(dto.CharacterName, dto.Realm, dto.Account);
-                    }
-                }
-            }
+            JsonConfigFile.Load();
+            wowWtfFolderTextbox.Text = JsonConfigFile.wowWtfFolder;
+
             string wtfAccountDir = wowWtfFolderTextbox.Text + "\\Account";
             addedCharactersPanel.wtfAccountDir = wtfAccountDir;
+
+            foreach (AddedCharacterDto addedCharacterDto in JsonConfigFile.addedCharacters)
+            {
+                string characterName = addedCharacterDto.CharacterName;
+                string realm = addedCharacterDto.Realm;
+                string account = addedCharacterDto.Account;
+                addedCharactersPanel.AddCharacter(characterName, realm, account);
+            }
         }
 
         private void addCharacterButton_Click(object sender, EventArgs e)
@@ -85,12 +82,41 @@ namespace WowWtfSync.WindowsApp
             }
 
             addedCharactersPanel.AddCharacter(selectedCharacterName, selectedRealm, selectedAccount);
+            addedCharactersPanel.SaveAddedCharacters();
         }
 
         private void scanButton_Click(object sender, EventArgs e)
         {
             string wtfAccountDir = wowWtfFolderTextbox.Text + "\\Account";
-            string[] accountDirs = Directory.GetDirectories(wtfAccountDir);
+            List<string> accountDirs = new List<string>();
+            try
+            {
+                accountDirs = Directory.GetDirectories(wtfAccountDir).ToList();
+            }
+            catch (DirectoryNotFoundException)
+            {
+                MessageBox.Show(
+                    "The specified WTF folder does not exist.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                return;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                MessageBox.Show(
+                    "You do not have permission to access the specified WTF folder.",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+                return;
+            }
+
+            // Save the new WTF folder location in config.json
+            JsonConfigFile.wowWtfFolder = wowWtfFolderTextbox.Text;
+            JsonConfigFile.Save();
 
             // Re-read the WTF folder
             this.characterDirs.Clear();

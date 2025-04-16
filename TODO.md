@@ -1,3 +1,4 @@
 # TODO
 
-- Add saving and loading of the WoW WTF Folder textbox into/from the config.json file.
+- Properly scale the window when resized.
+- Add a button to push all characters.
