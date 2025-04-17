@@ -183,7 +183,8 @@ namespace WowWtfSync.WindowsApp
                 string realm = characterMatch.Groups[2].Value;
                 string character = characterMatch.Groups[3].Value;
 
-                if (!accountToCharactersDict.ContainsKey(account)) {
+                if (!accountToCharactersDict.ContainsKey(account))
+                {
                     accountToCharactersDict.Add(account, new List<string>());
                 }
                 List<string> charactersList = accountToCharactersDict[account];

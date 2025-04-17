@@ -6,8 +6,8 @@
      */
     public class AddedCharacterDto
     {
-        public string CharacterName;
-        public string Realm;
-        public string Account;
+        public string CharacterName { get; set; }
+        public string Realm { get; set; }
+        public string Account { get; set; }
     }
 }

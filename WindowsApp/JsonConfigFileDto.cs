@@ -6,7 +6,7 @@
      */
     public class JsonConfigFileDto
     {
-        public List<AddedCharacterDto> AddedCharacters;
-        public string WowWtfFolder;
+        public List<AddedCharacterDto> AddedCharacters { get; set; }
+        public string WowWtfFolder { get; set; }
     }
 }
