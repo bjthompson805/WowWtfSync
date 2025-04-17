@@ -39,6 +39,9 @@
     <None Update="LuaApp\lib\DataCombine\DataCombineFactory.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="LuaApp\lib\Util.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="LuaApp\lua_modules\30log.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

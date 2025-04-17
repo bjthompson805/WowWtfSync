@@ -11,69 +11,128 @@ local me = class("DataCombine.DataCombine")
 
 function me:init() end -- Constructor
 
-function me:combine()
-    self.errorMsg = self.name .. ":combine() is an abstract method and must be implemented."
-    return false
+-- This method combines one character into all other accounts listed in the jsonConfigPath.
+function me:combine(wtfAccountDir, characterName, realm, sourceAccount, jsonConfigPath)
+    -- Get all unique accounts listed in the config
+    local util = require("Util")
+    local configTable = util:getJsonConfigTable(jsonConfigPath)
+    local uniqueAccounts = {}
+    for _, character in ipairs(configTable.AddedCharacters) do
+        uniqueAccounts[character.Account] = true
+    end
+    uniqueAccounts[sourceAccount] = nil -- Remove the current account
+
+    for destAccount in pairs(uniqueAccounts) do
+        -- Read the old destination file
+        local destPath = self:getPath(wtfAccountDir, destAccount)
+        local fh = io.open(destPath, "r")
+        if fh == nil then
+            self.errorMsg = "Could not open file '" .. destPath .. "'"
+            return false
+        end
+        local oldDestStr = fh:read("*all")
+        fh:close()
+
+        -- Read the source file
+        local sourcePath = self:getPath(wtfAccountDir, sourceAccount)
+        fh = io.open(sourcePath, "r")
+        if fh == nil then
+            self.errorMsg = "Could not open file '" .. destPath .. "'"
+            return false
+        end
+        local sourceStr = fh:read("*all")
+        fh:close()
+
+        -- Combine the character from the source file into the destination file
+        local newDestStr = self:combineOne(
+            characterName,
+            realm,
+            sourceAccount,
+            sourceStr,
+            oldDestStr
+        )
+
+        -- Save the new destination file
+        fh = io.open(destPath, "w")
+        if fh == nil then
+            self.errorMsg = "Could not open file '" .. destPath .. "'"
+            return false
+        end
+        fh:write(newDestStr)
+        fh:close()
+    end
+
+    return true
 end
 
---[[
-A simple function to print tables or to write tables into files.
-Great for debugging but also for data storage.
-When writing into files the 'return' keyword will be added automatically,
-so the tables can be loaded with 'dofile()' into a variable.
-The basic datatypes table, string, number, boolean and nil are supported.
-The tables can be nested and have number and string indices.
-This function has no protection when writing files without proper permissions and
-when datatypes other then the supported ones are used.
-Taken from https://gist.github.com/marcotrosi/163b9e890e012c6a460a and modified.
---]]
--- t = table
--- f = filename [optional]
--- variableName = name of the variable assigned when saving to a file [required with 'f']
-function me:printTable(t, f, variableName)
+-- This method combines all characters listed in the jsonConfigPath into all other accounts.
+function me:combineAll(wtfAccountDir, jsonConfigPath)
+    -- Get all unique accounts listed in the config
+    local util = require("Util")
+    local configTable = util:getJsonConfigTable(jsonConfigPath)
+    local uniqueAccounts = {}
+    for _, character in ipairs(configTable.AddedCharacters) do
+        uniqueAccounts[character.Account] = true
+    end
+    
+    local accountToNewDestStr = {}
+    for account in pairs(uniqueAccounts) do
+        local path = self:getPath(wtfAccountDir, account)
+        local fh = io.open(path, "r")
+        if fh == nil then
+            self.errorMsg = "Could not open file '" .. path .. "'"
+            return nil
+        end
+        local str = fh:read("*all")
+        fh:close()
 
-   local function printTableHelper(obj, cnt)
+        accountToNewDestStr[account] = str
+    end
 
-      local cnt = cnt or 0
+    -- Combine all characters into all *other* accounts
+    for _,sourceCharacter in ipairs(configTable.AddedCharacters) do
+        local sourceStr = accountToNewDestStr[sourceCharacter.Account]
+        for destAccount, oldDestStr in pairs(accountToNewDestStr) do
+            -- Skip account for this character
+            if sourceCharacter.Account == destAccount then goto continue end
 
-      if type(obj) == "table" then
+            -- Combine
+            local newDestStr = self:combineOne(
+                sourceCharacter.CharacterName,
+                sourceCharacter.Realm,
+                sourceCharacter.Account,
+                sourceStr,
+                oldDestStr
+            )
+            accountToNewDestStr[destAccount] = newDestStr
 
-         io.write("\n", string.rep("\t", cnt), "{\n")
-         cnt = cnt + 1
+            ::continue::
+        end
+    end
 
-         for k,v in pairs(obj) do
+    for account, newDestStr in pairs(accountToNewDestStr) do
+        -- Save the new destination file
+        local destPath = self:getPath(wtfAccountDir, account)
+        local fh = io.open(destPath, "w")
+        if fh == nil then
+            self.errorMsg = "Could not open file '" .. destPath .. "'"
+            return nil
+        end
+        fh:write(newDestStr)
+        fh:close()
+    end
 
-            if type(k) == "string" then
-               io.write(string.rep("\t",cnt), '["'..k..'"]', ' = ')
-            end
+    return configTable.AddedCharacters
+end
 
-            if type(k) == "number" then
-               io.write(string.rep("\t",cnt), "["..k.."]", " = ")
-            end
+function me:combineOne(characterName, realm, sourceAccount, sourceStr, oldDestStr)
+    self.errorMsg = self.name .. ":combineOne() is an abstract method and must be implemented."
+    return nil
+end
 
-            printTableHelper(v, cnt)
-            io.write(",\n")
-         end
-
-         cnt = cnt-1
-         io.write(string.rep("\t", cnt), "}")
-
-      elseif type(obj) == "string" then
-         io.write(string.format("%q", obj))
-
-      else
-         io.write(tostring(obj))
-      end 
-   end
-
-   if f == nil then
-      printTableHelper(t)
-   else
-      io.output(f)
-      io.write(variableName .. " = ")
-      printTableHelper(t)
-      io.output(io.stdout)
-   end
+function me:getPath(wtfAccountDir, account)
+    self.errorMsg = self.name .. ":getPath() is an abstract method and must be implemented."
+    return nil
 end
 
 return me

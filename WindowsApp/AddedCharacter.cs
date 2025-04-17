@@ -1,6 +1,4 @@
-﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 
 namespace WowWtfSync.WindowsApp
 {
@@ -31,6 +29,7 @@ namespace WowWtfSync.WindowsApp
             );
             removeCharacterButton.AutoSize = true;
             removeCharacterButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            removeCharacterButton.Anchor = AnchorStyles.None;
             byte[] cancelButtonImageData = Properties.Resources.Cancel;
             MemoryStream memoryStream = new MemoryStream();
             memoryStream.Write(cancelButtonImageData, 0, cancelButtonImageData.Length);
@@ -47,6 +46,7 @@ namespace WowWtfSync.WindowsApp
             );
             pushCharacterButton.AutoSize = true;
             pushCharacterButton.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            pushCharacterButton.Anchor = AnchorStyles.None;
             byte[] pushButtonImageData = Properties.Resources.Push;
             memoryStream = new MemoryStream();
             memoryStream.Write(pushButtonImageData, 0, pushButtonImageData.Length);
@@ -70,67 +70,15 @@ namespace WowWtfSync.WindowsApp
 
         private void PushCharacterButton_Click(object sender, EventArgs e)
         {
-            try
-            {
-                using (Process process = new Process())
-                {
-                    string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            List<string> argList = new List<string>();
+            argList.Add('"' + @".\push.lua" + '"');
+            argList.Add('"' + parentPanel.wtfAccountDir + '"');
+            argList.Add("Bagnon");
+            argList.Add('"' + Path.Combine(workingDirectory, "config.json") + '"');
+            argList.Add(this.characterName + "-" + this.realm + "-" + this.account);
 
-                    List<string> argList = new List<string>();
-                    argList.Add('"' + @".\push.lua" + '"');
-                    argList.Add('"' + parentPanel.wtfAccountDir + '"');
-                    argList.Add(this.characterName);
-                    argList.Add(this.realm);
-                    argList.Add(this.account);
-                    argList.Add("Bagnon");
-                    argList.Add('"' + Path.Combine(workingDirectory, "config.json") + '"');
-
-                    process.StartInfo.UseShellExecute = false;
-                    process.StartInfo.FileName = workingDirectory + @"\LuaApp\lua-5.4.2\lua54.exe";
-                    process.StartInfo.WorkingDirectory = workingDirectory;
-                    process.StartInfo.Arguments = String.Join(' ', argList.ToArray());
-                    process.StartInfo.CreateNoWindow = true;
-                    process.StartInfo.RedirectStandardOutput = true;
-                    process.StartInfo.RedirectStandardError = true;
-                    process.Start();
-
-                    // Synchronously read the standard error/output of the spawned process.
-                    StreamReader stdoutReader = process.StandardOutput;
-                    string stdout = stdoutReader.ReadToEnd();
-                    StreamReader stderrReader = process.StandardError;
-                    string stderr = stderrReader.ReadToEnd();
-
-                    if (stderr != "")
-                    {
-                        MessageBox.Show(
-                            stderr,
-                            "Error",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Error
-                        );
-                    }
-                    else
-                    {
-                        MessageBox.Show(
-                            stdout,
-                            "Success",
-                            MessageBoxButtons.OK,
-                            MessageBoxIcon.Information
-                        );
-                    }
-
-                    process.WaitForExit();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    ex.Message,
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-            }
+            LuaRunner.Run(argList);
         }
     }
 }

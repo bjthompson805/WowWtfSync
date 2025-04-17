@@ -12,6 +12,8 @@ This app will focus primarily on WoW Classic Era, but will be expanded to Classi
 
 The data combining feature will utilize a background Lua script to properly handle combining Lua files. A Lua module will be created for each supported addon.
 
+When combining, all characters and accounts that are being pushed to must be logged out, otherwise it will revert when logout occurs. The character being pushed from does not need to be logged out.
+
 ## Current features
 
 - Combine Bagnon data across accounts.

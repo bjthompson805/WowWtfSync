@@ -1,10 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.Text.Json;
-
-namespace WowWtfSync.WindowsApp
+﻿namespace WowWtfSync.WindowsApp
 {
-    public class AddedCharactersPanel : FlowLayoutPanel
+    public class AddedCharactersPanel : TableLayoutPanel
     {
         public List<AddedCharacter> addedCharacters;
         public string wtfAccountDir;
@@ -17,6 +13,11 @@ namespace WowWtfSync.WindowsApp
 
         public void AddCharacter(string characterName, string realm, string account)
         {
+            if (this.addedCharacters.Count == 0)
+            {
+                this.Controls.Find("addedCharactersToolbar", true)[0].Show();
+            }
+
             AddedCharacter addedCharacter = new AddedCharacter(characterName, realm, account, this);
             this.addedCharacters.Add(addedCharacter);
             this.Controls.Add(addedCharacter);
@@ -26,6 +27,11 @@ namespace WowWtfSync.WindowsApp
         {
             this.addedCharacters.Remove(addedCharacter);
             this.Controls.Remove(addedCharacter);
+
+            if (this.addedCharacters.Count == 0)
+            {
+                this.Controls.Find("addedCharactersToolbar", true)[0].Hide();
+            }
         }
 
         public void SaveAddedCharacters()
@@ -41,6 +47,16 @@ namespace WowWtfSync.WindowsApp
             ).ToList();
             JsonConfigFile.addedCharacters = addedCharactersDtoList;
             JsonConfigFile.Save();
+        }
+
+        public void RemoveAll()
+        {
+            foreach (AddedCharacter addedCharacter in this.addedCharacters)
+            {
+                this.Controls.Remove(addedCharacter);
+            }
+            this.addedCharacters.Clear();
+            this.Controls.Find("addedCharactersToolbar", true)[0].Hide();
         }
     }
 }

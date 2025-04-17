@@ -120,4 +120,23 @@
   <data name="label2.Text" xml:space="preserve">
     <value>Welcome to WoW WTF Sync! This Windows application will allow you to import, export, and combine (for supported addons) settings and data from your WoW WTF folder across accounts, and even across computers.</value>
   </data>
+  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="removeAllButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
+        JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAA68AAAOvAGVvHJJAAAAhklE
+        QVQ4T2NgoBY4zi6ugC6GDWBVBxI8yiX26jC3uAO6HDIAyYPUYTXkMI+ozREusZdHucWd0OVA4AiPiC0+
+        eTDAZQgucawAXTE6nygA8itYE5doCYgmFDZYAUjzUW7x/yAaXY4goMgF6H5G5+MFuKKKKENwaYYBvIZQ
+        JSViFcQCiFVHPwAA6g5YEuFUY5cAAAAASUVORK5CYII=
+</value>
+  </data>
+  <data name="pushAllButton.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+    <value>
+        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
+        JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAA68AAAOvAGVvHJJAAAAbElE
+        QVQ4T+2PUQqAIBBEu4kze46C6E6etTPUJYwBDbEPtQj66IEMi7tvdRjewjk3k1yV5V0VDQHYSQZll4Tk
+        BGAzs0UCMxtTXfZeyIdjHZTNEgA+f24SiPgtfza3kAtu8Qu+IOhGG2unnHnMAe4OLxdFrSs7AAAAAElF
+        TkSuQmCC
+</value>
+  </data>
 </root>

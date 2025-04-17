@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace WowWtfSync.WindowsApp
 {
@@ -191,6 +192,24 @@ namespace WowWtfSync.WindowsApp
                 charactersList.Add(character + "-" + realm);
             }
             return accountToCharactersDict;
+        }
+
+        private void removeAllButton_Click(object sender, EventArgs e)
+        {
+            addedCharactersPanel.RemoveAll();
+        }
+
+        private void pushAllButton_Click(object sender, EventArgs e)
+        {
+            string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            List<string> argList = new List<string>();
+            argList.Add('"' + @".\push.lua" + '"');
+            argList.Add('"' + addedCharactersPanel.wtfAccountDir + '"');
+            argList.Add("Bagnon");
+            argList.Add('"' + Path.Combine(workingDirectory, "config.json") + '"');
+            argList.Add("all");
+
+            LuaRunner.Run(argList);
         }
     }
 }

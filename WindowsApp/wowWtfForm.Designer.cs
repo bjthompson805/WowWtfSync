@@ -41,9 +41,14 @@
             wowWtfFolderTextbox = new TextBox();
             label2 = new Label();
             addedCharactersPanel = new AddedCharactersPanel();
+            addedCharactersToolbar = new TableLayoutPanel();
+            removeAllButton = new Button();
+            pushAllButton = new Button();
             appPanel.SuspendLayout();
             addCharactersPanel.SuspendLayout();
             wowWtfFolderPanel.SuspendLayout();
+            addedCharactersPanel.SuspendLayout();
+            addedCharactersToolbar.SuspendLayout();
             SuspendLayout();
             // 
             // appPanel
@@ -183,15 +188,64 @@
             // addedCharactersPanel
             // 
             addedCharactersPanel.AutoScroll = true;
-            addedCharactersPanel.AutoSize = true;
-            addedCharactersPanel.BorderStyle = BorderStyle.FixedSingle;
+            addedCharactersPanel.ColumnCount = 1;
+            addedCharactersPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            addedCharactersPanel.Controls.Add(addedCharactersToolbar, 0, 0);
             addedCharactersPanel.Dock = DockStyle.Fill;
-            addedCharactersPanel.FlowDirection = FlowDirection.TopDown;
             addedCharactersPanel.Location = new Point(3, 168);
             addedCharactersPanel.Name = "addedCharactersPanel";
+            addedCharactersPanel.RowCount = 2;
+            addedCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));
+            addedCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
             addedCharactersPanel.Size = new Size(1234, 231);
-            addedCharactersPanel.TabIndex = 22;
-            addedCharactersPanel.WrapContents = false;
+            addedCharactersPanel.TabIndex = 26;
+            // 
+            // addedCharactersToolbar
+            // 
+            addedCharactersToolbar.ColumnCount = 7;
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 175F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 175F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            addedCharactersToolbar.Controls.Add(removeAllButton, 0, 0);
+            addedCharactersToolbar.Controls.Add(pushAllButton, 1, 0);
+            addedCharactersToolbar.Dock = DockStyle.Fill;
+            addedCharactersToolbar.Location = new Point(3, 3);
+            addedCharactersToolbar.Name = "addedCharactersToolbar";
+            addedCharactersToolbar.RowCount = 1;
+            addedCharactersToolbar.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            addedCharactersToolbar.Size = new Size(1228, 54);
+            addedCharactersToolbar.TabIndex = 0;
+            addedCharactersToolbar.Visible = false;
+            // 
+            // removeAllButton
+            // 
+            removeAllButton.Dock = DockStyle.Fill;
+            removeAllButton.Image = (Image)resources.GetObject("removeAllButton.Image");
+            removeAllButton.Location = new Point(3, 3);
+            removeAllButton.Name = "removeAllButton";
+            removeAllButton.Size = new Size(169, 48);
+            removeAllButton.TabIndex = 0;
+            removeAllButton.Text = "Remove All";
+            removeAllButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            removeAllButton.UseVisualStyleBackColor = true;
+            removeAllButton.Click += removeAllButton_Click;
+            // 
+            // pushAllButton
+            // 
+            pushAllButton.Dock = DockStyle.Fill;
+            pushAllButton.Image = (Image)resources.GetObject("pushAllButton.Image");
+            pushAllButton.Location = new Point(178, 3);
+            pushAllButton.Name = "pushAllButton";
+            pushAllButton.Size = new Size(169, 48);
+            pushAllButton.TabIndex = 1;
+            pushAllButton.Text = "Push All";
+            pushAllButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushAllButton.UseVisualStyleBackColor = true;
+            pushAllButton.Click += pushAllButton_Click;
             // 
             // wowWtfSyncForm
             // 
@@ -202,10 +256,11 @@
             Name = "wowWtfSyncForm";
             Text = "WoW WTF Sync";
             appPanel.ResumeLayout(false);
-            appPanel.PerformLayout();
             addCharactersPanel.ResumeLayout(false);
             wowWtfFolderPanel.ResumeLayout(false);
             wowWtfFolderPanel.PerformLayout();
+            addedCharactersPanel.ResumeLayout(false);
+            addedCharactersToolbar.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -222,5 +277,8 @@
         private TextBox wowWtfFolderTextbox;
         private Label label2;
         private AddedCharactersPanel addedCharactersPanel;
+        private TableLayoutPanel addedCharactersToolbar;
+        private Button removeAllButton;
+        private Button pushAllButton;
     }
 }

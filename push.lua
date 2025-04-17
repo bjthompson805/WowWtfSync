@@ -5,37 +5,72 @@ package.path = package.path .. ";.\\LuaApp\\lua_modules\\?.lua;.\\LuaApp\\lib\\?
 require "requireNested" -- Allow for instantiation of modules in nested directories
 require "DataCombine.DataCombineFactory"
 
-if (#arg ~= 6) then
-    error("USAGE: " .. arg[0] .. " <wtfAccountDir> <characterName> <realm> <account> <addonName> <jsonConfig>")
+if (#arg ~= 4) then
+    error(
+        "\nUSAGE:\n" ..
+        "\t" .. arg[0] .. " <wtfAccountDir> <addonName> <jsonConfigPath> <characterName>-<realm>-<account>\n" ..
+        "\t" .. arg[0] .. " <wtfAccountDir> <addonName> <jsonConfigPath> all"
+    )
     os.exit(1)
 end
 
 local wtfAccountDir = arg[1]
-local characterName = arg[2]
-local realm = arg[3]
-local account = arg[4]
-local addonName = arg[5]
-local jsonConfig = arg[6]
+local addonName = arg[2]
+local jsonConfigPath = arg[3]
+local character = arg[4]
 local dataCombineObj = DataCombine.DataCombineFactory:create(addonName)
-if (
-    dataCombineObj:combine(
-        wtfAccountDir,
-        characterName,
-        realm,
-        account,
-        addonName,
-        jsonConfig
-    )
-) then
-    print(string.format(
-        "'%s' data for character '%s' on realm '%s' for account '%s' has been successfully " ..
-        "combined to all other accounts.",
-        addonName,
-        characterName,
-        realm,
-        account
-    ))
+
+if (character == "all") then
+    local combinedCharacters = dataCombineObj:combineAll(wtfAccountDir, jsonConfigPath)
+    if (combinedCharacters ~= nil) then
+        print("Data has been successfully combined for all characters by pushing from the character to all *other* accounts:\n")
+        for _, combinedCharacter in ipairs(combinedCharacters) 
+        do
+            print(string.format(
+                "\t%s-%s = %s",
+                combinedCharacter.CharacterName,
+                combinedCharacter.Realm,
+                combinedCharacter.Account
+            ))
+        end
+    else
+        error(dataCombineObj.name .. ":combineAll() failed: " .. dataCombineObj.errorMsg)
+        os.exit(1)
+    end
 else
-    error(dataCombineObj.name .. ":combine() failed: " .. dataCombineObj.errorMsg)
-    os.exit(1)
+    local characterSplitIter = string.gmatch(character, "[^%-]+")
+    local characterName = characterSplitIter()
+    local realm = characterSplitIter()
+    local account = characterSplitIter()
+
+    if (
+        characterName == nil or
+        realm == nil or
+        account == nil
+    ) then
+        error("4th argument must be of the form '<characterName>-<realm>-<account>' or 'all'.")
+        os.exit(1)
+    end
+
+    if (
+        dataCombineObj:combine(
+            wtfAccountDir,
+            characterName,
+            realm,
+            account,
+            jsonConfigPath
+        )
+    ) then
+        print(string.format(
+            "'%s' data for character '%s' on realm '%s' for account '%s' has been successfully " ..
+            "combined to all other accounts.",
+            addonName,
+            characterName,
+            realm,
+            account
+        ))
+    else
+        error(dataCombineObj.name .. ":combine() failed: " .. dataCombineObj.errorMsg)
+        os.exit(1)
+    end
 end
