@@ -59,7 +59,7 @@ namespace WowWtfSync.WindowsApp
             JsonConfigFileDto jsonConfigFileDto = new JsonConfigFileDto
             {
                 AddedCharacters = JsonConfigFile.addedCharacters,
-                WowWtfFolder = JsonConfigFile.wowWtfFolder,
+                WowWtfFolder = JsonConfigFile.wowWtfFolder
             };
             string jsonString = JsonSerializer.Serialize(jsonConfigFileDto);
             File.WriteAllText(jsonFile, jsonString);

@@ -39,7 +39,8 @@
             }
 
             description += " This will copy any scan days for an item that haven't been seen " +
-                "by the destination account. This process may take a few minutes.";
+                "by the destination account so that missing days will be merged in. " +
+                "This process may take a few minutes.";
 
             description += "\n\nMake sure to log out of all characters that are being pushed " +
                 "to, otherwise the data will be overwritten when logout occurs.";

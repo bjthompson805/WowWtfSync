@@ -182,7 +182,8 @@ function thisClass:combineOne(
     faction,
     sourceStr,
     oldDestStr,
-    configTable
+    configTable,
+    destAccount
 )
     self.errorMsg = self.name .. ":combineOne() is an abstract method and must be implemented."
     return nil

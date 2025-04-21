@@ -159,7 +159,11 @@ namespace WowWtfSync.WindowsApp
                 argList.Add(this.characterName + "-" + this.realm + "-" + this.account);
             }
 
+            Button pushButton = (Button)sender;
+            pushButton.Text = "Pushing...";
+            pushButton.Enabled = false;
             LuaRunner.Run(argList);
+            this.Close();
         }
     }
 }

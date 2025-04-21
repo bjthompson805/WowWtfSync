@@ -32,6 +32,12 @@ function thisClass:combineOne(
     -- Evaluate the source file
     local sourceAuctionatorFn = assert(load(sourceStr))
     sourceAuctionatorFn()
+    local sourceAuctionatorPriceDatabase = AUCTIONATOR_PRICE_DATABASE
+
+    -- Evaluate the destination file
+    destAuctionatorFn = assert(load(oldDestStr))
+    destAuctionatorFn()
+    local destAuctionatorPriceDatabase = AUCTIONATOR_PRICE_DATABASE
     local extraVariables = {
         "AUCTIONATOR_CONFIG",
         "AUCTIONATOR_SAVEDVARS",
@@ -41,16 +47,10 @@ function thisClass:combineOne(
         "AUCTIONATOR_RECENT_SEARCHES",
         "AUCTIONATOR_SELLING_GROUPS"
     }
-    local sourceAuctionatorExtraVariables = {}
+    local destAuctionatorExtraVariables = {}
     for _, varName in ipairs(extraVariables) do
-        sourceAuctionatorExtraVariables[varName] = _G[varName]
+        destAuctionatorExtraVariables[varName] = _G[varName]
     end
-    local sourceAuctionatorPriceDatabase = AUCTIONATOR_PRICE_DATABASE
-
-    -- Evaluate the destination file
-    destAuctionatorFn = assert(load(oldDestStr))
-    destAuctionatorFn()
-    local destAuctionatorPriceDatabase = AUCTIONATOR_PRICE_DATABASE
 
     local priceDbKey = realm .. " " .. faction
     if (type(sourceAuctionatorPriceDatabase[priceDbKey]) ~= "table") then
@@ -103,7 +103,7 @@ function thisClass:combineOne(
     local util = require("Util")
     local newDestStr = "AUCTIONATOR_PRICE_DATABASE = " ..
         util:printTable(destAuctionatorPriceDatabase) .. "\n"
-    for varName, varValue in pairs(sourceAuctionatorExtraVariables) do
+    for varName, varValue in pairs(destAuctionatorExtraVariables) do
         newDestStr = newDestStr .. varName .. " = " .. util:printTable(varValue) .. "\n"
     end
     self.alreadyCombined[alreadyCombinedKey] = true
