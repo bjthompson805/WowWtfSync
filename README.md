@@ -16,17 +16,24 @@ When combining, all characters and accounts that are being pushed to must be log
 
 ## Current features
 
-- Combine Bagnon data across accounts.
+- Combine Bagnon character data across accounts.
+- Combine Auctionator scan data across accounts.
 
 ## Planned features
 
 - Combine other addons' data across accounts.
-- Configure sharing/copying of global settings for Bagnon and other addons across accounts.
+- Configure sharing/copying of global settings addons across accounts.
 - Configure sharing/copying of character-specific settings for addons across accounts.
 - Cloud sync of WTF data.
 - Cloud sync of WTF settings.
 
+## Screenshots
+
+![alt text](https://github.com/bjthompson805/WowWtfSync/blob/master/Resources/screenshot-1.png?raw=true)
+![alt text](https://github.com/bjthompson805/WowWtfSync/blob/master/Resources/screenshot-2.png?raw=true)
+![alt text](https://github.com/bjthompson805/WowWtfSync/blob/master/Resources/screenshot-3.png?raw=true)
+![alt text](https://github.com/bjthompson805/WowWtfSync/blob/master/Resources/screenshot-4.png?raw=true)
+
 ## Developer practices
 
 - Development must make sure that user data does not get corrupted as a result of a bug or updates to an addon, so make sure to make assurances with regard to data integrity, possible race conditions, etc.
-- Because WoW likely does not have a lot of protection around outside processes modifying the WTF files (doesn't use semaphores), race conditions need to be kept in mind.
