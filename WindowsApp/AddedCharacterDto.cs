@@ -9,5 +9,6 @@
         public string CharacterName { get; set; }
         public string Realm { get; set; }
         public string Account { get; set; }
+        public string Faction { get; set; }
     }
 }

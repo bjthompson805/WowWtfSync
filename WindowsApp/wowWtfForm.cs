@@ -1,7 +1,4 @@
-using System.Diagnostics;
-using System.Text.Json;
 using System.Text.RegularExpressions;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
 
 namespace WowWtfSync.WindowsApp
 {
@@ -29,8 +26,11 @@ namespace WowWtfSync.WindowsApp
                 string characterName = addedCharacterDto.CharacterName;
                 string realm = addedCharacterDto.Realm;
                 string account = addedCharacterDto.Account;
-                addedCharactersPanel.AddCharacter(characterName, realm, account);
+                string faction = addedCharacterDto.Faction;
+                addedCharactersPanel.AddCharacter(characterName, realm, account, faction);
             }
+
+            this.StartPosition = FormStartPosition.CenterScreen;
         }
 
         private void addCharacterButton_Click(object sender, EventArgs e)
@@ -82,7 +82,12 @@ namespace WowWtfSync.WindowsApp
                 return;
             }
 
-            addedCharactersPanel.AddCharacter(selectedCharacterName, selectedRealm, selectedAccount);
+            addedCharactersPanel.AddCharacter(
+                selectedCharacterName,
+                selectedRealm,
+                selectedAccount,
+                "Alliance"
+            );
             addedCharactersPanel.SaveAddedCharacters();
         }
 
@@ -196,20 +201,28 @@ namespace WowWtfSync.WindowsApp
 
         private void removeAllButton_Click(object sender, EventArgs e)
         {
-            addedCharactersPanel.RemoveAll();
+            string message = "Are you sure you want to remove all characters?";
+            string caption = "Remove all characters";
+            MessageBoxButtons buttons = MessageBoxButtons.YesNo;
+            DialogResult result = MessageBox.Show(message, caption, buttons);
+            if (result == DialogResult.Yes)
+            {
+                addedCharactersPanel.RemoveAll();
+            }
         }
 
-        private void pushAllButton_Click(object sender, EventArgs e)
+        private void pushAllBagnonButton_Click(object sender, EventArgs e)
         {
-            string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-            List<string> argList = new List<string>();
-            argList.Add('"' + @".\push.lua" + '"');
-            argList.Add('"' + addedCharactersPanel.wtfAccountDir + '"');
-            argList.Add("Bagnon");
-            argList.Add('"' + Path.Combine(workingDirectory, "config.json") + '"');
-            argList.Add("all");
+            PushBagnonConfigurationForm pushBagnonConfigurationForm =
+                new PushBagnonConfigurationForm();
+            pushBagnonConfigurationForm.Show();
+        }
 
-            LuaRunner.Run(argList);
+        private void pushAllAuctionatorButton_Click(object sender, EventArgs e)
+        {
+            PushAuctionatorConfigurationForm pushAuctionatorConfigurationForm =
+                new PushAuctionatorConfigurationForm();
+            pushAuctionatorConfigurationForm.Show();
         }
     }
 }

@@ -7,25 +7,43 @@
 
 local class = require "30log"
 
-local me = class("DataCombine.DataCombine")
+local thisClass = class("DataCombine.DataCombine")
 
-function me:init() end -- Constructor
+function thisClass:init() end -- Constructor
 
--- This method combines one character into all other accounts listed in the jsonConfigPath.
-function me:combine(wtfAccountDir, characterName, realm, sourceAccount, jsonConfigPath)
+-- This method combines the given character into all other accounts listed in the jsonConfigPath.
+function thisClass:combine(characterName, realm, sourceAccount, jsonConfigPath)
     -- Get all unique accounts listed in the config
     local util = require("Util")
     local configTable = util:getJsonConfigTable(jsonConfigPath)
     local uniqueAccounts = {}
+    local faction = nil
+
+    -- Get all unique accounts as well as the faction of the character
     for _, character in ipairs(configTable.AddedCharacters) do
         uniqueAccounts[character.Account] = true
+
+        if (character.CharacterName == characterName and
+            character.Realm == realm and
+            character.Account == sourceAccount
+        ) then
+            faction = character.Faction
+        end
     end
     uniqueAccounts[sourceAccount] = nil -- Remove the current account
 
+    if (faction == nil) then
+        self.errorMsg = "Could not determine faction for the character " ..
+            "because the character is not in the config file '" .. jsonConfigPath ..
+            "'."
+        return false
+    end
+
+    local wtfAccountDir = configTable.WowWtfFolder .. "\\Account"
     for destAccount in pairs(uniqueAccounts) do
         -- Read the old destination file
         local destPath = self:getPath(wtfAccountDir, destAccount)
-        local fh = io.open(destPath, "r")
+        local fh = io.open(destPath, "rb")
         if fh == nil then
             self.errorMsg = "Could not open file '" .. destPath .. "'"
             return false
@@ -35,7 +53,7 @@ function me:combine(wtfAccountDir, characterName, realm, sourceAccount, jsonConf
 
         -- Read the source file
         local sourcePath = self:getPath(wtfAccountDir, sourceAccount)
-        fh = io.open(sourcePath, "r")
+        fh = io.open(sourcePath, "rb")
         if fh == nil then
             self.errorMsg = "Could not open file '" .. destPath .. "'"
             return false
@@ -48,9 +66,18 @@ function me:combine(wtfAccountDir, characterName, realm, sourceAccount, jsonConf
             characterName,
             realm,
             sourceAccount,
+            faction,
             sourceStr,
-            oldDestStr
+            oldDestStr,
+            configTable,
+            destAccount
         )
+        if (newDestStr == nil) then
+            self.errorMsg = self.name .. ":combineOne() failed for character '" ..
+                characterName .. "-" .. realm .. "-" .. sourceAccount .. ": " ..
+                self.errorMsg
+            return false
+        end
 
         -- Save the new destination file
         fh = io.open(destPath, "w")
@@ -66,7 +93,7 @@ function me:combine(wtfAccountDir, characterName, realm, sourceAccount, jsonConf
 end
 
 -- This method combines all characters listed in the jsonConfigPath into all other accounts.
-function me:combineAll(wtfAccountDir, jsonConfigPath)
+function thisClass:combineAll(jsonConfigPath)
     -- Get all unique accounts listed in the config
     local util = require("Util")
     local configTable = util:getJsonConfigTable(jsonConfigPath)
@@ -75,10 +102,11 @@ function me:combineAll(wtfAccountDir, jsonConfigPath)
         uniqueAccounts[character.Account] = true
     end
     
+    local wtfAccountDir = configTable.WowWtfFolder .. "\\Account"
     local accountToNewDestStr = {}
     for account in pairs(uniqueAccounts) do
         local path = self:getPath(wtfAccountDir, account)
-        local fh = io.open(path, "r")
+        local fh = io.open(path, "rb")
         if fh == nil then
             self.errorMsg = "Could not open file '" .. path .. "'"
             return nil
@@ -101,9 +129,18 @@ function me:combineAll(wtfAccountDir, jsonConfigPath)
                 sourceCharacter.CharacterName,
                 sourceCharacter.Realm,
                 sourceCharacter.Account,
+                sourceCharacter.Faction,
                 sourceStr,
-                oldDestStr
+                oldDestStr,
+                configTable,
+                destAccount
             )
+            if (newDestStr == nil) then
+                self.errorMsg = self.name .. ":combineOne() failed for character '" ..
+                    sourceCharacter.CharacterName .. "-" .. sourceCharacter.Realm ..
+                    "-" .. sourceCharacter.Account .. ": " .. self.errorMsg
+                return false
+            end
             accountToNewDestStr[destAccount] = newDestStr
 
             ::continue::
@@ -113,7 +150,7 @@ function me:combineAll(wtfAccountDir, jsonConfigPath)
     for account, newDestStr in pairs(accountToNewDestStr) do
         -- Save the new destination file
         local destPath = self:getPath(wtfAccountDir, account)
-        local fh = io.open(destPath, "w")
+        local fh = io.open(destPath, "wb")
         if fh == nil then
             self.errorMsg = "Could not open file '" .. destPath .. "'"
             return nil
@@ -125,14 +162,36 @@ function me:combineAll(wtfAccountDir, jsonConfigPath)
     return configTable.AddedCharacters
 end
 
-function me:combineOne(characterName, realm, sourceAccount, sourceStr, oldDestStr)
+-- This method is the addon-specific logic for combining one character, and is used by
+-- combine() and combineAll().
+-- Input:
+--     characterName [string] - the character being copied from
+--     realm [string] - the realm of the character being copied from
+--     sourceAccount [string] - the account of the character being copied from
+--     faction [string] - the faction of the character being copied from
+--     sourceStr [string] - the data of the account being copied from
+--     oldDestStr [string] - the data of the account being copied to
+--     configTable [table] - the config table from config.json
+--     destAccount [string] - the account being copied to
+-- Output:
+--     newDestStr [string] - the new data of the account being copied to
+function thisClass:combineOne(
+    characterName,
+    realm,
+    sourceAccount,
+    faction,
+    sourceStr,
+    oldDestStr,
+    configTable
+)
     self.errorMsg = self.name .. ":combineOne() is an abstract method and must be implemented."
     return nil
 end
 
-function me:getPath(wtfAccountDir, account)
+-- This method returns the path to the addon's lua data file for the given account.
+function thisClass:getPath(wtfAccountDir, account)
     self.errorMsg = self.name .. ":getPath() is an abstract method and must be implemented."
     return nil
 end
 
-return me
+return thisClass

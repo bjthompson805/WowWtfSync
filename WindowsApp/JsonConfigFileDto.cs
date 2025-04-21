@@ -8,5 +8,11 @@
     {
         public List<AddedCharacterDto> AddedCharacters { get; set; }
         public string WowWtfFolder { get; set; }
+
+        public JsonConfigFileDto()
+        {
+            this.AddedCharacters = new List<AddedCharacterDto>();
+            this.WowWtfFolder = string.Empty;
+        }
     }
 }

@@ -3,9 +3,9 @@
 
 local class = require "30log"
 
-local me = class("Util")
+local thisClass = class("Util")
 
-function me:getJsonConfigTable(jsonConfigPath)
+function thisClass:getJsonConfigTable(jsonConfigPath)
     local fh = io.open(jsonConfigPath, "r")
     if fh == nil then
         self.errorMsg = "Could not open file '" .. jsonConfigPath .. "'"
@@ -32,7 +32,7 @@ Taken from https://gist.github.com/marcotrosi/163b9e890e012c6a460a and modified.
 --]]
 -- t = table
 -- f = filename [optional] (if omitted, a string is returned)
-function me:printTable(t, f)
+function thisClass:printTable(t, f)
     local function printTableHelper(obj, cnt)
         local cnt = cnt or 0
         local tableStr = ""
@@ -59,7 +59,12 @@ function me:printTable(t, f)
             tableStr = tableStr .. string.rep("\t", cnt) .. "}"
         
         elseif type(obj) == "string" then
-            tableStr = tableStr .. string.format("%q", obj)
+            obj = string.gsub(obj, "\\", "\\\\")
+            obj = string.gsub(obj, "\000", "\\000")
+            obj = string.gsub(obj, "\n", "\\n")
+            obj = string.gsub(obj, "\r", "\\r")
+            obj = string.gsub(obj, '"', '\\"')
+            tableStr = tableStr .. string.format('"%s"', obj)
         else
             tableStr = tableStr .. tostring(obj)
         end
@@ -84,4 +89,4 @@ function me:printTable(t, f)
     end
 end
 
-return me
+return thisClass

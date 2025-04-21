@@ -2,11 +2,11 @@
 require "DataCombine.DataCombine"
 
 -- Inherit from DataCombine.DataCombine
-local me = DataCombine.DataCombine:extend("DataCombine.DataCombineBagnon")
+local thisClass = DataCombine.DataCombine:extend("DataCombine.DataCombineBagnon")
 
-function me:init() end -- Constructor
+function thisClass:init() end -- Constructor
 
-function me:combineOne(characterName, realm, sourceAccount, sourceStr, oldDestStr)
+function thisClass:combineOne(characterName, realm, sourceAccount, faction, sourceStr, oldDestStr)
     -- Evaluate the source BagBrother file
     local sourceBagBrotherFn = assert(load(sourceStr))
     sourceBagBrotherFn()
@@ -18,6 +18,14 @@ function me:combineOne(characterName, realm, sourceAccount, sourceStr, oldDestSt
     local destBrotherBags = BrotherBags
 
     -- Combine
+    if (sourceBrotherBags[realm] == nil) then
+        self.errorMsg = "Source realm '" .. realm .. "' not found in the file for account '" ..
+            sourceAccount .."'. You may need to log onto the character first."
+        return nil
+    end
+    if (destBrotherBags[realm] == nil) then
+        destBrotherBags[realm] = {}
+    end
     destBrotherBags[realm][characterName] = sourceBrotherBags[realm][characterName]
 
     -- Return the new destination string
@@ -26,8 +34,8 @@ function me:combineOne(characterName, realm, sourceAccount, sourceStr, oldDestSt
     return newDestStr
 end
 
-function me:getPath(wtfAccountDir, account)
+function thisClass:getPath(wtfAccountDir, account)
     return wtfAccountDir .. "\\" .. account .. "\\SavedVariables\\BagBrother.lua"
 end
 
-return me
+return thisClass

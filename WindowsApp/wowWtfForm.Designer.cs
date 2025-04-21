@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(wowWtfSyncForm));
             appPanel = new TableLayoutPanel();
             addCharactersPanel = new TableLayoutPanel();
@@ -36,14 +37,18 @@
             accountsList = new ListBox();
             wowWtfFolderPanel = new TableLayoutPanel();
             scanButton = new Button();
-            label3 = new Label();
             wowWtfFolderLabel = new Label();
             wowWtfFolderTextbox = new TextBox();
             label2 = new Label();
             addedCharactersPanel = new AddedCharactersPanel();
             addedCharactersToolbar = new TableLayoutPanel();
+            pushAuctionatorButton = new Button();
+            globalImageList = new ImageList(components);
             removeAllButton = new Button();
-            pushAllButton = new Button();
+            pushBagnonButton = new Button();
+            pushBagnonButtonTooltip = new ToolTip(components);
+            removeAllButtonTooltip = new ToolTip(components);
+            pushAuctionatorButtonTooltip = new ToolTip(components);
             appPanel.SuspendLayout();
             addCharactersPanel.SuspendLayout();
             wowWtfFolderPanel.SuspendLayout();
@@ -62,10 +67,10 @@
             appPanel.Location = new Point(0, 0);
             appPanel.Name = "appPanel";
             appPanel.RowCount = 3;
-            appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 165F));
+            appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F));
             appPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 350F));
-            appPanel.Size = new Size(1240, 752);
+            appPanel.Size = new Size(1240, 929);
             appPanel.TabIndex = 22;
             // 
             // addCharactersPanel
@@ -77,7 +82,7 @@
             addCharactersPanel.Controls.Add(charactersList, 1, 0);
             addCharactersPanel.Controls.Add(accountsList, 0, 0);
             addCharactersPanel.Dock = DockStyle.Fill;
-            addCharactersPanel.Location = new Point(3, 405);
+            addCharactersPanel.Location = new Point(3, 582);
             addCharactersPanel.Name = "addCharactersPanel";
             addCharactersPanel.RowCount = 2;
             addCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
@@ -121,25 +126,23 @@
             wowWtfFolderPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 208F));
             wowWtfFolderPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             wowWtfFolderPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 108F));
-            wowWtfFolderPanel.Controls.Add(scanButton, 2, 2);
-            wowWtfFolderPanel.Controls.Add(label3, 0, 1);
-            wowWtfFolderPanel.Controls.Add(wowWtfFolderLabel, 0, 2);
-            wowWtfFolderPanel.Controls.Add(wowWtfFolderTextbox, 1, 2);
+            wowWtfFolderPanel.Controls.Add(scanButton, 2, 1);
+            wowWtfFolderPanel.Controls.Add(wowWtfFolderLabel, 0, 1);
+            wowWtfFolderPanel.Controls.Add(wowWtfFolderTextbox, 1, 1);
             wowWtfFolderPanel.Controls.Add(label2, 0, 0);
             wowWtfFolderPanel.Dock = DockStyle.Fill;
             wowWtfFolderPanel.Location = new Point(3, 3);
             wowWtfFolderPanel.Name = "wowWtfFolderPanel";
-            wowWtfFolderPanel.RowCount = 3;
-            wowWtfFolderPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 68F));
-            wowWtfFolderPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
+            wowWtfFolderPanel.RowCount = 1;
+            wowWtfFolderPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 65F));
             wowWtfFolderPanel.RowStyles.Add(new RowStyle());
-            wowWtfFolderPanel.Size = new Size(1234, 159);
+            wowWtfFolderPanel.Size = new Size(1234, 114);
             wowWtfFolderPanel.TabIndex = 24;
             // 
             // scanButton
             // 
             scanButton.Anchor = AnchorStyles.Right;
-            scanButton.Location = new Point(1129, 112);
+            scanButton.Location = new Point(1129, 68);
             scanButton.Name = "scanButton";
             scanButton.Size = new Size(102, 42);
             scanButton.TabIndex = 12;
@@ -147,21 +150,10 @@
             scanButton.UseVisualStyleBackColor = true;
             scanButton.Click += scanButton_Click;
             // 
-            // label3
-            // 
-            label3.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            label3.AutoSize = true;
-            wowWtfFolderPanel.SetColumnSpan(label3, 3);
-            label3.Location = new Point(3, 72);
-            label3.Name = "label3";
-            label3.Size = new Size(1228, 32);
-            label3.TabIndex = 11;
-            label3.Text = "The first iteration of this program will allow for combining Bagnon data across accounts.";
-            // 
             // wowWtfFolderLabel
             // 
             wowWtfFolderLabel.Anchor = AnchorStyles.Left;
-            wowWtfFolderLabel.Location = new Point(3, 116);
+            wowWtfFolderLabel.Location = new Point(3, 72);
             wowWtfFolderLabel.Name = "wowWtfFolderLabel";
             wowWtfFolderLabel.Size = new Size(199, 35);
             wowWtfFolderLabel.TabIndex = 9;
@@ -170,20 +162,20 @@
             // wowWtfFolderTextbox
             // 
             wowWtfFolderTextbox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
-            wowWtfFolderTextbox.Location = new Point(211, 114);
+            wowWtfFolderTextbox.Location = new Point(211, 70);
             wowWtfFolderTextbox.Name = "wowWtfFolderTextbox";
             wowWtfFolderTextbox.Size = new Size(912, 39);
             wowWtfFolderTextbox.TabIndex = 8;
             // 
             // label2
             // 
-            label2.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             wowWtfFolderPanel.SetColumnSpan(label2, 3);
+            label2.Dock = DockStyle.Fill;
             label2.Location = new Point(3, 0);
             label2.Name = "label2";
-            label2.Size = new Size(1228, 68);
+            label2.Size = new Size(1228, 65);
             label2.TabIndex = 6;
-            label2.Text = resources.GetString("label2.Text");
+            label2.Text = "Welcome to WoW WTF Sync! This Windows application will allow you to combine data from your WoW WTF folder across accounts.";
             // 
             // addedCharactersPanel
             // 
@@ -192,26 +184,26 @@
             addedCharactersPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             addedCharactersPanel.Controls.Add(addedCharactersToolbar, 0, 0);
             addedCharactersPanel.Dock = DockStyle.Fill;
-            addedCharactersPanel.Location = new Point(3, 168);
+            addedCharactersPanel.Location = new Point(3, 123);
             addedCharactersPanel.Name = "addedCharactersPanel";
             addedCharactersPanel.RowCount = 2;
             addedCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));
-            addedCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            addedCharactersPanel.Size = new Size(1234, 231);
+            addedCharactersPanel.RowStyles.Add(new RowStyle());
+            addedCharactersPanel.Size = new Size(1234, 453);
             addedCharactersPanel.TabIndex = 26;
             // 
             // addedCharactersToolbar
             // 
-            addedCharactersToolbar.ColumnCount = 7;
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 175F));
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 175F));
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            addedCharactersToolbar.ColumnCount = 6;
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33333F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
+            addedCharactersToolbar.Controls.Add(pushAuctionatorButton, 2, 0);
             addedCharactersToolbar.Controls.Add(removeAllButton, 0, 0);
-            addedCharactersToolbar.Controls.Add(pushAllButton, 1, 0);
+            addedCharactersToolbar.Controls.Add(pushBagnonButton, 1, 0);
             addedCharactersToolbar.Dock = DockStyle.Fill;
             addedCharactersToolbar.Location = new Point(3, 3);
             addedCharactersToolbar.Name = "addedCharactersToolbar";
@@ -221,37 +213,64 @@
             addedCharactersToolbar.TabIndex = 0;
             addedCharactersToolbar.Visible = false;
             // 
+            // pushAuctionatorButton
+            // 
+            pushAuctionatorButton.Dock = DockStyle.Fill;
+            pushAuctionatorButton.ImageKey = "Push.png";
+            pushAuctionatorButton.ImageList = globalImageList;
+            pushAuctionatorButton.Location = new Point(453, 3);
+            pushAuctionatorButton.Name = "pushAuctionatorButton";
+            pushAuctionatorButton.Size = new Size(244, 48);
+            pushAuctionatorButton.TabIndex = 2;
+            pushAuctionatorButton.Text = "Push Auctionator";
+            pushAuctionatorButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushAuctionatorButtonTooltip.SetToolTip(pushAuctionatorButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
+            pushAuctionatorButton.UseVisualStyleBackColor = true;
+            pushAuctionatorButton.Click += pushAllAuctionatorButton_Click;
+            // 
+            // globalImageList
+            // 
+            globalImageList.ColorDepth = ColorDepth.Depth32Bit;
+            globalImageList.ImageStream = (ImageListStreamer)resources.GetObject("globalImageList.ImageStream");
+            globalImageList.TransparentColor = Color.Transparent;
+            globalImageList.Images.SetKeyName(0, "Cancel.png");
+            globalImageList.Images.SetKeyName(1, "Push.png");
+            // 
             // removeAllButton
             // 
             removeAllButton.Dock = DockStyle.Fill;
-            removeAllButton.Image = (Image)resources.GetObject("removeAllButton.Image");
+            removeAllButton.ImageKey = "Cancel.png";
+            removeAllButton.ImageList = globalImageList;
             removeAllButton.Location = new Point(3, 3);
             removeAllButton.Name = "removeAllButton";
-            removeAllButton.Size = new Size(169, 48);
+            removeAllButton.Size = new Size(219, 48);
             removeAllButton.TabIndex = 0;
             removeAllButton.Text = "Remove All";
             removeAllButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            removeAllButtonTooltip.SetToolTip(removeAllButton, "Remove all characters listed below.");
             removeAllButton.UseVisualStyleBackColor = true;
             removeAllButton.Click += removeAllButton_Click;
             // 
-            // pushAllButton
+            // pushBagnonButton
             // 
-            pushAllButton.Dock = DockStyle.Fill;
-            pushAllButton.Image = (Image)resources.GetObject("pushAllButton.Image");
-            pushAllButton.Location = new Point(178, 3);
-            pushAllButton.Name = "pushAllButton";
-            pushAllButton.Size = new Size(169, 48);
-            pushAllButton.TabIndex = 1;
-            pushAllButton.Text = "Push All";
-            pushAllButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            pushAllButton.UseVisualStyleBackColor = true;
-            pushAllButton.Click += pushAllButton_Click;
+            pushBagnonButton.Dock = DockStyle.Fill;
+            pushBagnonButton.ImageKey = "Push.png";
+            pushBagnonButton.ImageList = globalImageList;
+            pushBagnonButton.Location = new Point(228, 3);
+            pushBagnonButton.Name = "pushBagnonButton";
+            pushBagnonButton.Size = new Size(219, 48);
+            pushBagnonButton.TabIndex = 1;
+            pushBagnonButton.Text = "Push Bagnon";
+            pushBagnonButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushBagnonButtonTooltip.SetToolTip(pushBagnonButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
+            pushBagnonButton.UseVisualStyleBackColor = true;
+            pushBagnonButton.Click += pushAllBagnonButton_Click;
             // 
             // wowWtfSyncForm
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1240, 752);
+            ClientSize = new Size(1240, 929);
             Controls.Add(appPanel);
             Name = "wowWtfSyncForm";
             Text = "WoW WTF Sync";
@@ -272,13 +291,17 @@
         private ListBox accountsList;
         private TableLayoutPanel wowWtfFolderPanel;
         private Button scanButton;
-        private Label label3;
         private Label wowWtfFolderLabel;
         private TextBox wowWtfFolderTextbox;
         private Label label2;
         private AddedCharactersPanel addedCharactersPanel;
         private TableLayoutPanel addedCharactersToolbar;
         private Button removeAllButton;
-        private Button pushAllButton;
+        private Button pushBagnonButton;
+        private ImageList globalImageList;
+        private ToolTip removeAllButtonTooltip;
+        private ToolTip pushBagnonButtonTooltip;
+        private Button pushAuctionatorButton;
+        private ToolTip pushAuctionatorButtonTooltip;
     }
 }

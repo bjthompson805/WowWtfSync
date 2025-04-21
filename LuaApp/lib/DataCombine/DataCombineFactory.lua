@@ -3,20 +3,22 @@
 -- It is used to create instances of the DataCombine class for each addon by passing
 -- the case-insensitive addon name to the create() method.
 
-require "DataCombine.DataCombineBagnon"
-
 local class = require "30log"
 
-local me = class("DataCombine.DataCombineFactory")
+local thisClass = class("DataCombine.DataCombineFactory")
 
-function me:create(addonName)
+function thisClass:create(addonName)
     local addonName = string.lower(addonName)
     if (addonName == "bagnon") then
+        require "DataCombine.DataCombineBagnon"
         return DataCombine.DataCombineBagnon:new()
+    elseif (addonName == "auctionator") then
+        require "DataCombine.DataCombineAuctionator"
+        return DataCombine.DataCombineAuctionator:new()
     else
-        self.errorMsg = "Unknown addon name '" .. addonName .. "'"
+        thisClass.errorMsg = "Unknown addon name '" .. addonName .. "'"
         return nil
     end
 end
 
-return me
+return thisClass

@@ -5,26 +5,35 @@ package.path = package.path .. ";.\\LuaApp\\lua_modules\\?.lua;.\\LuaApp\\lib\\?
 require "requireNested" -- Allow for instantiation of modules in nested directories
 require "DataCombine.DataCombineFactory"
 
-if (#arg ~= 4) then
+if (#arg ~= 3) then
     error(
         "\nUSAGE:\n" ..
-        "\t" .. arg[0] .. " <wtfAccountDir> <addonName> <jsonConfigPath> <characterName>-<realm>-<account>\n" ..
-        "\t" .. arg[0] .. " <wtfAccountDir> <addonName> <jsonConfigPath> all"
+        "\t" .. arg[0] .. " <addonName> <jsonConfigPath> <characterName>-<realm>-<account>\n" ..
+        "\t" .. arg[0] .. " <addonName> <jsonConfigPath> all"
     )
     os.exit(1)
 end
 
-local wtfAccountDir = arg[1]
-local addonName = arg[2]
-local jsonConfigPath = arg[3]
-local character = arg[4]
+local addonName = arg[1]
+local jsonConfigPath = arg[2]
+local character = arg[3]
 local dataCombineObj = DataCombine.DataCombineFactory:create(addonName)
+if dataCombineObj == nil then
+    error(
+        "DataCombine.DataCombineFactory:create() failed for addon '" .. addonName ..
+        "': " .. DataCombine.DataCombineFactory.errorMsg
+    )
+    os.exit(1)
+end
 
 if (character == "all") then
-    local combinedCharacters = dataCombineObj:combineAll(wtfAccountDir, jsonConfigPath)
+    local combinedCharacters = dataCombineObj:combineAll(jsonConfigPath)
     if (combinedCharacters ~= nil) then
-        print("Data has been successfully combined for all characters by pushing from the character to all *other* accounts:\n")
-        for _, combinedCharacter in ipairs(combinedCharacters) 
+        print(
+            "'" .. addonName .. "' data has been successfully combined for " ..
+            "all characters by pushing from the character to all *other* accounts:\n"
+        )
+        for _, combinedCharacter in ipairs(combinedCharacters)
         do
             print(string.format(
                 "\t%s-%s = %s",
@@ -54,7 +63,6 @@ else
 
     if (
         dataCombineObj:combine(
-            wtfAccountDir,
             characterName,
             realm,
             account,

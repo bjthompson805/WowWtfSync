@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace WowWtfSync.WindowsApp
 {
@@ -24,8 +25,17 @@ namespace WowWtfSync.WindowsApp
             if (File.Exists(jsonFile))
             {
                 string jsonString = File.ReadAllText(jsonFile);
-                JsonConfigFileDto jsonConfigFileDto =
-                    JsonSerializer.Deserialize<JsonConfigFileDto>(jsonString);
+                JsonConfigFileDto? jsonConfigFileDto =
+                    JsonSerializer.Deserialize<JsonConfigFileDto>(
+                        jsonString,
+                        new JsonSerializerOptions
+                        {
+                            // Prevent it from overwriting the values instantiated by
+                            // the constructor with nulls when the config.json doesn't
+                            // have a property listed (e.g. after updating this app)
+                            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                        }
+                    );
                 if (jsonConfigFileDto != null)
                 {
                     JsonConfigFile.wowWtfFolder = jsonConfigFileDto.WowWtfFolder;
@@ -49,7 +59,7 @@ namespace WowWtfSync.WindowsApp
             JsonConfigFileDto jsonConfigFileDto = new JsonConfigFileDto
             {
                 AddedCharacters = JsonConfigFile.addedCharacters,
-                WowWtfFolder = JsonConfigFile.wowWtfFolder
+                WowWtfFolder = JsonConfigFile.wowWtfFolder,
             };
             string jsonString = JsonSerializer.Serialize(jsonConfigFileDto);
             File.WriteAllText(jsonFile, jsonString);
