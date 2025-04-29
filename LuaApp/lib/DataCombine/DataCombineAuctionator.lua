@@ -72,9 +72,12 @@ function thisClass:combineOne(
             local destItemData = destAuctionatorPriceDatabase[priceDbKey][itemID]
             local destItemDataDeserialized = cbor:Deserialize(destItemData)
             local sourceItemDataDeserialized = cbor:Deserialize(sourceItemData)
+            local destMostRecentDay = self:getMostRecentDay(destItemDataDeserialized)
+            local sourceMostRecentDay = self:getMostRecentDay(sourceItemDataDeserialized)
 
             -- Iterate through "a" (highest quantity seen). If it's not in the
-            -- destination data, then add it, "h", and "l" (if it exists).
+            -- destination data, then add it, "h" (highest low price), and "l"
+            -- (lowest low price) if it exists.
             for day, sourceHighestQuantitySeen in pairs(sourceItemDataDeserialized["a"]) do
                 if (destItemDataDeserialized["a"][day] == nil) then
                     destItemDataDeserialized["a"][day] = sourceHighestQuantitySeen
@@ -86,8 +89,6 @@ function thisClass:combineOne(
             end
             
             -- If the source data is more recent, then update the "m" (last seen minimum price).
-            local destMostRecentDay = self:getMostRecentDay(destItemDataDeserialized)
-            local sourceMostRecentDay = self:getMostRecentDay(sourceItemDataDeserialized)
             if (sourceMostRecentDay > destMostRecentDay) then
                 destItemDataDeserialized["m"] = sourceItemDataDeserialized["m"]
             end
