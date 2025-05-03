@@ -35,28 +35,28 @@ Taken from https://gist.github.com/marcotrosi/163b9e890e012c6a460a and modified.
 function thisClass:printTable(t, f)
     local function printTableHelper(obj, cnt)
         local cnt = cnt or 0
-        local tableStr = ""
+        local tableStr = {}
         
         if type(obj) == "table" then
         
-            tableStr = tableStr .. "\n" .. string.rep("\t", cnt) .. "{\n"
+            table.insert(tableStr, "\n" .. string.rep("\t", cnt) .. "{\n")
             cnt = cnt + 1
             
             for k,v in pairs(obj) do
                 if type(k) == "string" then
-                    tableStr = tableStr .. string.rep("\t",cnt) .. '["' .. k .. '"]' .. ' = '
+                    table.insert(tableStr, string.rep("\t",cnt) .. '["' .. k .. '"]' .. ' = ')
                 end
                 
                 if type(k) == "number" then
-                    tableStr = tableStr .. string.rep("\t",cnt) .. "[" .. k .. "]" .. " = "
+                    table.insert(tableStr, string.rep("\t",cnt) .. "[" .. k .. "]" .. " = ")
                 end
                 
-                tableStr = tableStr .. printTableHelper(v, cnt)
-                tableStr = tableStr .. ",\n"
+                table.insert(tableStr, printTableHelper(v, cnt))
+                table.insert(tableStr, ",\n")
             end
             
             cnt = cnt-1
-            tableStr = tableStr .. string.rep("\t", cnt) .. "}"
+            table.insert(tableStr, string.rep("\t", cnt) .. "}")
         
         elseif type(obj) == "string" then
             obj = string.gsub(obj, "\\", "\\\\")
@@ -64,12 +64,12 @@ function thisClass:printTable(t, f)
             obj = string.gsub(obj, "\n", "\\n")
             obj = string.gsub(obj, "\r", "\\r")
             obj = string.gsub(obj, '"', '\\"')
-            tableStr = tableStr .. string.format('"%s"', obj)
+            table.insert(tableStr, string.format('"%s"', obj))
         else
-            tableStr = tableStr .. tostring(obj)
+            table.insert(tableStr, tostring(obj))
         end
         
-        return tableStr
+        return table.concat(tableStr)
     end
     
     if f == nil then

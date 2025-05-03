@@ -66,7 +66,6 @@ function thisClass:combineOne(
 
         if (destAuctionatorPriceDatabase[priceDbKey][itemID] == nil) then
             destAuctionatorPriceDatabase[priceDbKey][itemID] = sourceItemData
-            goto nextItem
         else
             -- Combine the item data
             local destItemData = destAuctionatorPriceDatabase[priceDbKey][itemID]
@@ -96,8 +95,6 @@ function thisClass:combineOne(
             destAuctionatorPriceDatabase[priceDbKey][itemID] =
                 cbor:Serialize(destItemDataDeserialized)
         end
-
-        ::nextItem::
     end
 
     -- Return the new destination string
