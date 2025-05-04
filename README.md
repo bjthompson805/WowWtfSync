@@ -18,6 +18,8 @@ When combining, all characters and accounts that are being pushed to must be log
 
 - Combine Bagnon character data across accounts.
 - Combine Auctionator scan data across accounts.
+- Combine TitanGold data across accounts.
+- Combine NovaWorldBuffs data across accounts.
 
 ## Planned features
 

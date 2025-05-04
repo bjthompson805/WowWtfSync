@@ -142,8 +142,32 @@ namespace WowWtfSync.WindowsApp
                     );
                 pushBagnonForm.Show();
             };
+            ToolStripMenuItem titanGoldMenuItem = new ToolStripMenuItem("TitanGold");
+            titanGoldMenuItem.Click += (s, args) =>
+            {
+                PushTitanGoldConfigurationForm pushTitanGoldForm =
+                    new PushTitanGoldConfigurationForm(
+                        this.characterName,
+                        this.realm,
+                        this.account
+                    );
+                pushTitanGoldForm.Show();
+            };
+            ToolStripMenuItem novaWorldBuffsMenuItem = new ToolStripMenuItem("NovaWorldBuffs");
+            novaWorldBuffsMenuItem.Click += (s, args) =>
+            {
+                PushNovaWorldBuffsConfigurationForm pushNovaWorldBuffsForm =
+                    new PushNovaWorldBuffsConfigurationForm(
+                        this.characterName,
+                        this.realm,
+                        this.account
+                    );
+                pushNovaWorldBuffsForm.Show();
+            };
             contextMenu.Items.Add(auctionatorMenuItem);
             contextMenu.Items.Add(bagnonMenuItem);
+            contextMenu.Items.Add(titanGoldMenuItem);
+            contextMenu.Items.Add(novaWorldBuffsMenuItem);
             contextMenu.Show(Cursor.Position);
         }
     }

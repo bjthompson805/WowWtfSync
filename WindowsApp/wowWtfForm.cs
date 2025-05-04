@@ -224,5 +224,19 @@ namespace WowWtfSync.WindowsApp
                 new PushAuctionatorConfigurationForm();
             pushAuctionatorConfigurationForm.Show();
         }
+
+        private void pushTitanGoldButton_Click(object sender, EventArgs e)
+        {
+            PushTitanGoldConfigurationForm pushTitanGoldConfigurationForm =
+                new PushTitanGoldConfigurationForm();
+            pushTitanGoldConfigurationForm.Show();
+        }
+
+        private void pushNovaWorldBuffsButton_Click(object sender, EventArgs e)
+        {
+            PushNovaWorldBuffsConfigurationForm pushNovaWorldBuffsConfigurationForm =
+                new PushNovaWorldBuffsConfigurationForm();
+            pushNovaWorldBuffsConfigurationForm.Show();
+        }
     }
 }
