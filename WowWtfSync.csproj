@@ -42,6 +42,12 @@
     <None Update="LuaApp\lib\DataCombine\DataCombineFactory.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="LuaApp\lib\DataCombine\DataCombineNovaWorldBuffs.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LuaApp\lib\DataCombine\DataCombineTitanGold.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="LuaApp\lib\Util.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

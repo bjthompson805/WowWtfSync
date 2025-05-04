@@ -42,8 +42,10 @@
             label2 = new Label();
             addedCharactersPanel = new AddedCharactersPanel();
             addedCharactersToolbar = new TableLayoutPanel();
-            pushAuctionatorButton = new Button();
+            pushNovaWorldBuffsButton = new Button();
             globalImageList = new ImageList(components);
+            pushTitanGoldButton = new Button();
+            pushAuctionatorButton = new Button();
             removeAllButton = new Button();
             pushBagnonButton = new Button();
             pushBagnonButtonTooltip = new ToolTip(components);
@@ -194,13 +196,14 @@
             // 
             // addedCharactersToolbar
             // 
-            addedCharactersToolbar.ColumnCount = 6;
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225F));
+            addedCharactersToolbar.ColumnCount = 5;
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.33333F));
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 33.3333321F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle());
+            addedCharactersToolbar.Controls.Add(pushNovaWorldBuffsButton, 4, 0);
+            addedCharactersToolbar.Controls.Add(pushTitanGoldButton, 3, 0);
             addedCharactersToolbar.Controls.Add(pushAuctionatorButton, 2, 0);
             addedCharactersToolbar.Controls.Add(removeAllButton, 0, 0);
             addedCharactersToolbar.Controls.Add(pushBagnonButton, 1, 0);
@@ -213,20 +216,20 @@
             addedCharactersToolbar.TabIndex = 0;
             addedCharactersToolbar.Visible = false;
             // 
-            // pushAuctionatorButton
+            // pushNovaWorldBuffsButton
             // 
-            pushAuctionatorButton.Dock = DockStyle.Fill;
-            pushAuctionatorButton.ImageKey = "Push.png";
-            pushAuctionatorButton.ImageList = globalImageList;
-            pushAuctionatorButton.Location = new Point(453, 3);
-            pushAuctionatorButton.Name = "pushAuctionatorButton";
-            pushAuctionatorButton.Size = new Size(244, 48);
-            pushAuctionatorButton.TabIndex = 2;
-            pushAuctionatorButton.Text = "Push Auctionator";
-            pushAuctionatorButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            pushAuctionatorButtonTooltip.SetToolTip(pushAuctionatorButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
-            pushAuctionatorButton.UseVisualStyleBackColor = true;
-            pushAuctionatorButton.Click += pushAllAuctionatorButton_Click;
+            pushNovaWorldBuffsButton.Dock = DockStyle.Fill;
+            pushNovaWorldBuffsButton.ImageKey = "Push.png";
+            pushNovaWorldBuffsButton.ImageList = globalImageList;
+            pushNovaWorldBuffsButton.Location = new Point(928, 3);
+            pushNovaWorldBuffsButton.Name = "pushNovaWorldBuffsButton";
+            pushNovaWorldBuffsButton.Size = new Size(297, 48);
+            pushNovaWorldBuffsButton.TabIndex = 4;
+            pushNovaWorldBuffsButton.Text = "Push NovaWorldBuffs";
+            pushNovaWorldBuffsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushBagnonButtonTooltip.SetToolTip(pushNovaWorldBuffsButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
+            pushNovaWorldBuffsButton.UseVisualStyleBackColor = true;
+            pushNovaWorldBuffsButton.Click += pushNovaWorldBuffsButton_Click;
             // 
             // globalImageList
             // 
@@ -236,6 +239,36 @@
             globalImageList.Images.SetKeyName(0, "Cancel.png");
             globalImageList.Images.SetKeyName(1, "Push.png");
             // 
+            // pushTitanGoldButton
+            // 
+            pushTitanGoldButton.Dock = DockStyle.Fill;
+            pushTitanGoldButton.ImageKey = "Push.png";
+            pushTitanGoldButton.ImageList = globalImageList;
+            pushTitanGoldButton.Location = new Point(678, 3);
+            pushTitanGoldButton.Name = "pushTitanGoldButton";
+            pushTitanGoldButton.Size = new Size(244, 48);
+            pushTitanGoldButton.TabIndex = 3;
+            pushTitanGoldButton.Text = "Push TitanGold";
+            pushTitanGoldButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushBagnonButtonTooltip.SetToolTip(pushTitanGoldButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
+            pushTitanGoldButton.UseVisualStyleBackColor = true;
+            pushTitanGoldButton.Click += pushTitanGoldButton_Click;
+            // 
+            // pushAuctionatorButton
+            // 
+            pushAuctionatorButton.Dock = DockStyle.Fill;
+            pushAuctionatorButton.ImageKey = "Push.png";
+            pushAuctionatorButton.ImageList = globalImageList;
+            pushAuctionatorButton.Location = new Point(428, 3);
+            pushAuctionatorButton.Name = "pushAuctionatorButton";
+            pushAuctionatorButton.Size = new Size(244, 48);
+            pushAuctionatorButton.TabIndex = 2;
+            pushAuctionatorButton.Text = "Push Auctionator";
+            pushAuctionatorButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushAuctionatorButtonTooltip.SetToolTip(pushAuctionatorButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
+            pushAuctionatorButton.UseVisualStyleBackColor = true;
+            pushAuctionatorButton.Click += pushAllAuctionatorButton_Click;
+            // 
             // removeAllButton
             // 
             removeAllButton.Dock = DockStyle.Fill;
@@ -243,7 +276,7 @@
             removeAllButton.ImageList = globalImageList;
             removeAllButton.Location = new Point(3, 3);
             removeAllButton.Name = "removeAllButton";
-            removeAllButton.Size = new Size(219, 48);
+            removeAllButton.Size = new Size(194, 48);
             removeAllButton.TabIndex = 0;
             removeAllButton.Text = "Remove All";
             removeAllButton.TextImageRelation = TextImageRelation.ImageBeforeText;
@@ -256,7 +289,7 @@
             pushBagnonButton.Dock = DockStyle.Fill;
             pushBagnonButton.ImageKey = "Push.png";
             pushBagnonButton.ImageList = globalImageList;
-            pushBagnonButton.Location = new Point(228, 3);
+            pushBagnonButton.Location = new Point(203, 3);
             pushBagnonButton.Name = "pushBagnonButton";
             pushBagnonButton.Size = new Size(219, 48);
             pushBagnonButton.TabIndex = 1;
@@ -303,5 +336,7 @@
         private ToolTip pushBagnonButtonTooltip;
         private Button pushAuctionatorButton;
         private ToolTip pushAuctionatorButtonTooltip;
+        private Button pushNovaWorldBuffsButton;
+        private Button pushTitanGoldButton;
     }
 }

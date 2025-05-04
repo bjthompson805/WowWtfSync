@@ -15,6 +15,12 @@ function thisClass:create(addonName)
     elseif (addonName == "auctionator") then
         require "DataCombine.DataCombineAuctionator"
         return DataCombine.DataCombineAuctionator:new()
+    elseif (addonName == "titangold") then
+        require "DataCombine.DataCombineTitanGold"
+        return DataCombine.DataCombineTitanGold:new()
+    elseif (addonName == "novaworldbuffs") then
+        require "DataCombine.DataCombineNovaWorldBuffs"
+        return DataCombine.DataCombineNovaWorldBuffs:new()
     else
         thisClass.errorMsg = "Unknown addon name '" .. addonName .. "'"
         return nil
