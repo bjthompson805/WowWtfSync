@@ -42,8 +42,9 @@
             label2 = new Label();
             addedCharactersPanel = new AddedCharactersPanel();
             addedCharactersToolbar = new TableLayoutPanel();
-            pushAltoholicButton = new Button();
+            pushTitanGoldButton = new Button();
             globalImageList = new ImageList(components);
+            pushAltoholicButton = new Button();
             pushNovaWorldBuffsButton = new Button();
             pushAuctionatorButton = new Button();
             removeAllButton = new Button();
@@ -51,7 +52,6 @@
             pushBagnonButtonTooltip = new ToolTip(components);
             removeAllButtonTooltip = new ToolTip(components);
             pushAuctionatorButtonTooltip = new ToolTip(components);
-            pushTitanGoldButton = new Button();
             appPanel.SuspendLayout();
             addCharactersPanel.SuspendLayout();
             wowWtfFolderPanel.SuspendLayout();
@@ -220,6 +220,29 @@
             addedCharactersToolbar.TabIndex = 0;
             addedCharactersToolbar.Visible = false;
             // 
+            // pushTitanGoldButton
+            // 
+            pushTitanGoldButton.Dock = DockStyle.Fill;
+            pushTitanGoldButton.ImageKey = "Push.png";
+            pushTitanGoldButton.ImageList = globalImageList;
+            pushTitanGoldButton.Location = new Point(3, 58);
+            pushTitanGoldButton.Name = "pushTitanGoldButton";
+            pushTitanGoldButton.Size = new Size(219, 53);
+            pushTitanGoldButton.TabIndex = 6;
+            pushTitanGoldButton.Text = "Push TitanGold";
+            pushTitanGoldButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushBagnonButtonTooltip.SetToolTip(pushTitanGoldButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
+            pushTitanGoldButton.UseVisualStyleBackColor = true;
+            pushTitanGoldButton.Click += pushTitanGoldButton_Click;
+            // 
+            // globalImageList
+            // 
+            globalImageList.ColorDepth = ColorDepth.Depth32Bit;
+            globalImageList.ImageStream = (ImageListStreamer)resources.GetObject("globalImageList.ImageStream");
+            globalImageList.TransparentColor = Color.Transparent;
+            globalImageList.Images.SetKeyName(0, "Cancel.png");
+            globalImageList.Images.SetKeyName(1, "Push.png");
+            // 
             // pushAltoholicButton
             // 
             pushAltoholicButton.Dock = DockStyle.Fill;
@@ -234,14 +257,6 @@
             pushBagnonButtonTooltip.SetToolTip(pushAltoholicButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
             pushAltoholicButton.UseVisualStyleBackColor = true;
             pushAltoholicButton.Click += pushAltoholicButton_Click;
-            // 
-            // globalImageList
-            // 
-            globalImageList.ColorDepth = ColorDepth.Depth32Bit;
-            globalImageList.ImageStream = (ImageListStreamer)resources.GetObject("globalImageList.ImageStream");
-            globalImageList.TransparentColor = Color.Transparent;
-            globalImageList.Images.SetKeyName(0, "Cancel.png");
-            globalImageList.Images.SetKeyName(1, "Push.png");
             // 
             // pushNovaWorldBuffsButton
             // 
@@ -302,20 +317,6 @@
             pushBagnonButtonTooltip.SetToolTip(pushBagnonButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
             pushBagnonButton.UseVisualStyleBackColor = true;
             pushBagnonButton.Click += pushAllBagnonButton_Click;
-            // 
-            // pushTitanGoldButton
-            // 
-            pushTitanGoldButton.Dock = DockStyle.Fill;
-            pushTitanGoldButton.ImageKey = "Push.png";
-            pushTitanGoldButton.ImageList = globalImageList;
-            pushTitanGoldButton.Location = new Point(3, 58);
-            pushTitanGoldButton.Name = "pushTitanGoldButton";
-            pushTitanGoldButton.Size = new Size(219, 53);
-            pushTitanGoldButton.TabIndex = 6;
-            pushTitanGoldButton.Text = "Push TitanGold";
-            pushTitanGoldButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            pushBagnonButtonTooltip.SetToolTip(pushTitanGoldButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
-            pushTitanGoldButton.UseVisualStyleBackColor = true;
             // 
             // wowWtfSyncForm
             // 

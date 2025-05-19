@@ -41,10 +41,6 @@ if dataCombineObjs == nil then
     os.exit(1)
 end
 
-if (type(dataCombineObjs) ~= "table") then
-    dataCombineObjs = { dataCombineObjs }
-end
-
 -- Combine
 for _, dataCombineObj in ipairs(dataCombineObjs) do
     if (character == "all") then
@@ -65,14 +61,13 @@ for _, dataCombineObj in ipairs(dataCombineObjs) do
             os.exit(1)
         end
 
-        if (
-            dataCombineObj:combine(
-                characterName,
-                realm,
-                account,
-                jsonConfigPath
-            ) == nil
-        ) then
+        local success = dataCombineObj:combine(
+            characterName,
+            realm,
+            account,
+            jsonConfigPath
+        )
+        if (success ~= true) then
             error(dataCombineObj.name .. ":combine() failed: " .. dataCombineObj.errorMsg)
             os.exit(1)
         end

@@ -11,22 +11,22 @@ local thisClass = class("DataCombine.DataCombineFactory")
 -- Input:
 --     addonName [string] - name of the addon
 -- Output:
---     obj [object|table] - a class instance of the given module; for some classes,
---         multiple instances are created and returned in a table
+--     objs [table] - a table of objects to iterate through; for most addons, there will
+--         only be 1 element in this table.
 function thisClass:create(addonName)
     local addonName = string.lower(addonName)
     if (addonName == "bagnon") then
         require "DataCombine.DataCombineBagnon"
-        return DataCombine.DataCombineBagnon:new()
+        return { DataCombine.DataCombineBagnon:new() }
     elseif (addonName == "auctionator") then
         require "DataCombine.DataCombineAuctionator"
-        return DataCombine.DataCombineAuctionator:new()
+        return { DataCombine.DataCombineAuctionator:new() }
     elseif (addonName == "titangold") then
         require "DataCombine.DataCombineTitanGold"
-        return DataCombine.DataCombineTitanGold:new()
+        return { DataCombine.DataCombineTitanGold:new() }
     elseif (addonName == "novaworldbuffs") then
         require "DataCombine.DataCombineNovaWorldBuffs"
-        return DataCombine.DataCombineNovaWorldBuffs:new()
+        return { DataCombine.DataCombineNovaWorldBuffs:new() }
     elseif (addonName == "altoholic") then
         require "DataCombine.DataCombineAltoholic"
         local altoholicAddons = DataCombine.DataCombineAltoholic:getAltoholicAddons()
