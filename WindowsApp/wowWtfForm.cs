@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
@@ -16,6 +17,7 @@ namespace WowWtfSync.WindowsApp
 
         private void InitializeApplication()
         {
+            // Read the JSON config file and load the app with its data
             JsonConfigFile.Load();
             wowWtfFolderTextbox.Text = JsonConfigFile.wowWtfFolder;
 
@@ -31,6 +33,7 @@ namespace WowWtfSync.WindowsApp
                 addedCharactersPanel.AddCharacter(characterName, realm, account, faction);
             }
 
+            // Center the app vertically and horizontally
             this.StartPosition = FormStartPosition.CenterScreen;
 
             // Remove the horizontal scroll bar from the added characters panel
@@ -39,6 +42,11 @@ namespace WowWtfSync.WindowsApp
             addedCharactersPanel.HorizontalScroll.Visible = false;
             addedCharactersPanel.HorizontalScroll.Maximum = 0;
             addedCharactersPanel.AutoScroll = true;
+
+            // Add taskbar/window icon
+            string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            string iconFile = Path.Combine(workingDirectory, "app-icon.ico");
+            this.Icon = new Icon(iconFile);
         }
 
         private void addCharacterButton_Click(object sender, EventArgs e)
