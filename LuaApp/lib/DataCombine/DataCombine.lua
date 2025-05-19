@@ -74,7 +74,7 @@ function thisClass:combine(characterName, realm, sourceAccount, jsonConfigPath)
         )
         if (newDestStr == nil) then
             self.errorMsg = self.name .. ":combineOne() failed for character '" ..
-                characterName .. "-" .. realm .. "-" .. sourceAccount .. ": " ..
+                characterName .. "-" .. realm .. "-" .. sourceAccount .. "': " ..
                 self.errorMsg
             return false
         end
@@ -138,8 +138,8 @@ function thisClass:combineAll(jsonConfigPath)
             if (newDestStr == nil) then
                 self.errorMsg = self.name .. ":combineOne() failed for character '" ..
                     sourceCharacter.CharacterName .. "-" .. sourceCharacter.Realm ..
-                    "-" .. sourceCharacter.Account .. ": " .. self.errorMsg
-                return false
+                    "-" .. sourceCharacter.Account .. "': " .. self.errorMsg
+                return nil
             end
             accountToNewDestStr[destAccount] = newDestStr
 

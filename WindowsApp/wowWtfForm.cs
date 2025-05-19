@@ -1,4 +1,5 @@
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 
 namespace WowWtfSync.WindowsApp
 {
@@ -31,6 +32,13 @@ namespace WowWtfSync.WindowsApp
             }
 
             this.StartPosition = FormStartPosition.CenterScreen;
+
+            // Remove the horizontal scroll bar from the added characters panel
+            addedCharactersPanel.AutoScroll = false;
+            addedCharactersPanel.HorizontalScroll.Enabled = false;
+            addedCharactersPanel.HorizontalScroll.Visible = false;
+            addedCharactersPanel.HorizontalScroll.Maximum = 0;
+            addedCharactersPanel.AutoScroll = true;
         }
 
         private void addCharacterButton_Click(object sender, EventArgs e)
@@ -237,6 +245,13 @@ namespace WowWtfSync.WindowsApp
             PushNovaWorldBuffsConfigurationForm pushNovaWorldBuffsConfigurationForm =
                 new PushNovaWorldBuffsConfigurationForm();
             pushNovaWorldBuffsConfigurationForm.Show();
+        }
+
+        private void pushAltoholicButton_Click(object sender, EventArgs e)
+        {
+            PushAltoholicConfigurationForm pushAltoholicConfigurationForm =
+                new PushAltoholicConfigurationForm();
+            pushAltoholicConfigurationForm.Show();
         }
     }
 }

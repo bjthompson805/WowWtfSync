@@ -7,12 +7,12 @@ local thisClass = DataCombine.DataCombine:extend("DataCombine.DataCombineTitanGo
 function thisClass:init() end -- Constructor
 
 function thisClass:combineOne(characterName, realm, sourceAccount, faction, sourceStr, oldDestStr)
-    -- Evaluate the source BagBrother file
+    -- Evaluate the source file
     local sourceTitanGoldFn = assert(load(sourceStr))
     sourceTitanGoldFn()
     local sourceGoldSave = GoldSave
 
-    -- Evaluate the destination BagBrother file
+    -- Evaluate the destination file
     destTitanGoldFn = assert(load(oldDestStr))
     destTitanGoldFn()
     local destGoldSave = GoldSave

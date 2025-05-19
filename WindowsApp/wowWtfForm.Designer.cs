@@ -42,15 +42,16 @@
             label2 = new Label();
             addedCharactersPanel = new AddedCharactersPanel();
             addedCharactersToolbar = new TableLayoutPanel();
-            pushNovaWorldBuffsButton = new Button();
+            pushAltoholicButton = new Button();
             globalImageList = new ImageList(components);
-            pushTitanGoldButton = new Button();
+            pushNovaWorldBuffsButton = new Button();
             pushAuctionatorButton = new Button();
             removeAllButton = new Button();
             pushBagnonButton = new Button();
             pushBagnonButtonTooltip = new ToolTip(components);
             removeAllButtonTooltip = new ToolTip(components);
             pushAuctionatorButtonTooltip = new ToolTip(components);
+            pushTitanGoldButton = new Button();
             appPanel.SuspendLayout();
             addCharactersPanel.SuspendLayout();
             wowWtfFolderPanel.SuspendLayout();
@@ -72,7 +73,7 @@
             appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F));
             appPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 350F));
-            appPanel.Size = new Size(1240, 929);
+            appPanel.Size = new Size(1299, 979);
             appPanel.TabIndex = 22;
             // 
             // addCharactersPanel
@@ -84,18 +85,18 @@
             addCharactersPanel.Controls.Add(charactersList, 1, 0);
             addCharactersPanel.Controls.Add(accountsList, 0, 0);
             addCharactersPanel.Dock = DockStyle.Fill;
-            addCharactersPanel.Location = new Point(3, 582);
+            addCharactersPanel.Location = new Point(3, 632);
             addCharactersPanel.Name = "addCharactersPanel";
             addCharactersPanel.RowCount = 2;
             addCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             addCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 80F));
-            addCharactersPanel.Size = new Size(1234, 344);
+            addCharactersPanel.Size = new Size(1293, 344);
             addCharactersPanel.TabIndex = 25;
             // 
             // addCharacterButton
             // 
             addCharacterButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            addCharacterButton.Location = new Point(1071, 267);
+            addCharacterButton.Location = new Point(1130, 267);
             addCharacterButton.Name = "addCharacterButton";
             addCharacterButton.Size = new Size(160, 74);
             addCharacterButton.TabIndex = 23;
@@ -107,9 +108,9 @@
             // 
             charactersList.Dock = DockStyle.Fill;
             charactersList.FormattingEnabled = true;
-            charactersList.Location = new Point(465, 3);
+            charactersList.Location = new Point(487, 3);
             charactersList.Name = "charactersList";
-            charactersList.Size = new Size(766, 258);
+            charactersList.Size = new Size(803, 258);
             charactersList.TabIndex = 21;
             // 
             // accountsList
@@ -118,7 +119,7 @@
             accountsList.FormattingEnabled = true;
             accountsList.Location = new Point(3, 3);
             accountsList.Name = "accountsList";
-            accountsList.Size = new Size(456, 258);
+            accountsList.Size = new Size(478, 258);
             accountsList.TabIndex = 20;
             accountsList.SelectedIndexChanged += accountsList_SelectedIndexChanged;
             // 
@@ -138,13 +139,13 @@
             wowWtfFolderPanel.RowCount = 1;
             wowWtfFolderPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 65F));
             wowWtfFolderPanel.RowStyles.Add(new RowStyle());
-            wowWtfFolderPanel.Size = new Size(1234, 114);
+            wowWtfFolderPanel.Size = new Size(1293, 114);
             wowWtfFolderPanel.TabIndex = 24;
             // 
             // scanButton
             // 
             scanButton.Anchor = AnchorStyles.Right;
-            scanButton.Location = new Point(1129, 68);
+            scanButton.Location = new Point(1188, 68);
             scanButton.Name = "scanButton";
             scanButton.Size = new Size(102, 42);
             scanButton.TabIndex = 12;
@@ -166,7 +167,7 @@
             wowWtfFolderTextbox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             wowWtfFolderTextbox.Location = new Point(211, 70);
             wowWtfFolderTextbox.Name = "wowWtfFolderTextbox";
-            wowWtfFolderTextbox.Size = new Size(912, 39);
+            wowWtfFolderTextbox.Size = new Size(971, 39);
             wowWtfFolderTextbox.TabIndex = 8;
             // 
             // label2
@@ -175,7 +176,7 @@
             label2.Dock = DockStyle.Fill;
             label2.Location = new Point(3, 0);
             label2.Name = "label2";
-            label2.Size = new Size(1228, 65);
+            label2.Size = new Size(1287, 65);
             label2.TabIndex = 6;
             label2.Text = "Welcome to WoW WTF Sync! This Windows application will allow you to combine data from your WoW WTF folder across accounts.";
             // 
@@ -189,47 +190,50 @@
             addedCharactersPanel.Location = new Point(3, 123);
             addedCharactersPanel.Name = "addedCharactersPanel";
             addedCharactersPanel.RowCount = 2;
-            addedCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 60F));
+            addedCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F));
             addedCharactersPanel.RowStyles.Add(new RowStyle());
-            addedCharactersPanel.Size = new Size(1234, 453);
+            addedCharactersPanel.Size = new Size(1293, 503);
             addedCharactersPanel.TabIndex = 26;
             // 
             // addedCharactersToolbar
             // 
-            addedCharactersToolbar.ColumnCount = 5;
-            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200F));
+            addedCharactersToolbar.ColumnCount = 6;
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 300F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle());
+            addedCharactersToolbar.Controls.Add(pushTitanGoldButton, 0, 1);
+            addedCharactersToolbar.Controls.Add(pushAltoholicButton, 1, 0);
             addedCharactersToolbar.Controls.Add(pushNovaWorldBuffsButton, 4, 0);
-            addedCharactersToolbar.Controls.Add(pushTitanGoldButton, 3, 0);
             addedCharactersToolbar.Controls.Add(pushAuctionatorButton, 2, 0);
             addedCharactersToolbar.Controls.Add(removeAllButton, 0, 0);
-            addedCharactersToolbar.Controls.Add(pushBagnonButton, 1, 0);
+            addedCharactersToolbar.Controls.Add(pushBagnonButton, 3, 0);
             addedCharactersToolbar.Dock = DockStyle.Fill;
             addedCharactersToolbar.Location = new Point(3, 3);
             addedCharactersToolbar.Name = "addedCharactersToolbar";
-            addedCharactersToolbar.RowCount = 1;
-            addedCharactersToolbar.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            addedCharactersToolbar.Size = new Size(1228, 54);
+            addedCharactersToolbar.RowCount = 2;
+            addedCharactersToolbar.RowStyles.Add(new RowStyle(SizeType.Absolute, 55F));
+            addedCharactersToolbar.RowStyles.Add(new RowStyle());
+            addedCharactersToolbar.Size = new Size(1287, 114);
             addedCharactersToolbar.TabIndex = 0;
             addedCharactersToolbar.Visible = false;
             // 
-            // pushNovaWorldBuffsButton
+            // pushAltoholicButton
             // 
-            pushNovaWorldBuffsButton.Dock = DockStyle.Fill;
-            pushNovaWorldBuffsButton.ImageKey = "Push.png";
-            pushNovaWorldBuffsButton.ImageList = globalImageList;
-            pushNovaWorldBuffsButton.Location = new Point(928, 3);
-            pushNovaWorldBuffsButton.Name = "pushNovaWorldBuffsButton";
-            pushNovaWorldBuffsButton.Size = new Size(297, 48);
-            pushNovaWorldBuffsButton.TabIndex = 4;
-            pushNovaWorldBuffsButton.Text = "Push NovaWorldBuffs";
-            pushNovaWorldBuffsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            pushBagnonButtonTooltip.SetToolTip(pushNovaWorldBuffsButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
-            pushNovaWorldBuffsButton.UseVisualStyleBackColor = true;
-            pushNovaWorldBuffsButton.Click += pushNovaWorldBuffsButton_Click;
+            pushAltoholicButton.Dock = DockStyle.Fill;
+            pushAltoholicButton.ImageKey = "Push.png";
+            pushAltoholicButton.ImageList = globalImageList;
+            pushAltoholicButton.Location = new Point(228, 3);
+            pushAltoholicButton.Name = "pushAltoholicButton";
+            pushAltoholicButton.Size = new Size(219, 49);
+            pushAltoholicButton.TabIndex = 5;
+            pushAltoholicButton.Text = "Push Altoholic";
+            pushAltoholicButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushBagnonButtonTooltip.SetToolTip(pushAltoholicButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
+            pushAltoholicButton.UseVisualStyleBackColor = true;
+            pushAltoholicButton.Click += pushAltoholicButton_Click;
             // 
             // globalImageList
             // 
@@ -239,29 +243,29 @@
             globalImageList.Images.SetKeyName(0, "Cancel.png");
             globalImageList.Images.SetKeyName(1, "Push.png");
             // 
-            // pushTitanGoldButton
+            // pushNovaWorldBuffsButton
             // 
-            pushTitanGoldButton.Dock = DockStyle.Fill;
-            pushTitanGoldButton.ImageKey = "Push.png";
-            pushTitanGoldButton.ImageList = globalImageList;
-            pushTitanGoldButton.Location = new Point(678, 3);
-            pushTitanGoldButton.Name = "pushTitanGoldButton";
-            pushTitanGoldButton.Size = new Size(244, 48);
-            pushTitanGoldButton.TabIndex = 3;
-            pushTitanGoldButton.Text = "Push TitanGold";
-            pushTitanGoldButton.TextImageRelation = TextImageRelation.ImageBeforeText;
-            pushBagnonButtonTooltip.SetToolTip(pushTitanGoldButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
-            pushTitanGoldButton.UseVisualStyleBackColor = true;
-            pushTitanGoldButton.Click += pushTitanGoldButton_Click;
+            pushNovaWorldBuffsButton.Dock = DockStyle.Fill;
+            pushNovaWorldBuffsButton.ImageKey = "Push.png";
+            pushNovaWorldBuffsButton.ImageList = globalImageList;
+            pushNovaWorldBuffsButton.Location = new Point(953, 3);
+            pushNovaWorldBuffsButton.Name = "pushNovaWorldBuffsButton";
+            pushNovaWorldBuffsButton.Size = new Size(294, 49);
+            pushNovaWorldBuffsButton.TabIndex = 4;
+            pushNovaWorldBuffsButton.Text = "Push NovaWorldBuffs";
+            pushNovaWorldBuffsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushBagnonButtonTooltip.SetToolTip(pushNovaWorldBuffsButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
+            pushNovaWorldBuffsButton.UseVisualStyleBackColor = true;
+            pushNovaWorldBuffsButton.Click += pushNovaWorldBuffsButton_Click;
             // 
             // pushAuctionatorButton
             // 
             pushAuctionatorButton.Dock = DockStyle.Fill;
             pushAuctionatorButton.ImageKey = "Push.png";
             pushAuctionatorButton.ImageList = globalImageList;
-            pushAuctionatorButton.Location = new Point(428, 3);
+            pushAuctionatorButton.Location = new Point(453, 3);
             pushAuctionatorButton.Name = "pushAuctionatorButton";
-            pushAuctionatorButton.Size = new Size(244, 48);
+            pushAuctionatorButton.Size = new Size(244, 49);
             pushAuctionatorButton.TabIndex = 2;
             pushAuctionatorButton.Text = "Push Auctionator";
             pushAuctionatorButton.TextImageRelation = TextImageRelation.ImageBeforeText;
@@ -276,7 +280,7 @@
             removeAllButton.ImageList = globalImageList;
             removeAllButton.Location = new Point(3, 3);
             removeAllButton.Name = "removeAllButton";
-            removeAllButton.Size = new Size(194, 48);
+            removeAllButton.Size = new Size(219, 49);
             removeAllButton.TabIndex = 0;
             removeAllButton.Text = "Remove All";
             removeAllButton.TextImageRelation = TextImageRelation.ImageBeforeText;
@@ -289,9 +293,9 @@
             pushBagnonButton.Dock = DockStyle.Fill;
             pushBagnonButton.ImageKey = "Push.png";
             pushBagnonButton.ImageList = globalImageList;
-            pushBagnonButton.Location = new Point(203, 3);
+            pushBagnonButton.Location = new Point(703, 3);
             pushBagnonButton.Name = "pushBagnonButton";
-            pushBagnonButton.Size = new Size(219, 48);
+            pushBagnonButton.Size = new Size(244, 49);
             pushBagnonButton.TabIndex = 1;
             pushBagnonButton.Text = "Push Bagnon";
             pushBagnonButton.TextImageRelation = TextImageRelation.ImageBeforeText;
@@ -299,11 +303,25 @@
             pushBagnonButton.UseVisualStyleBackColor = true;
             pushBagnonButton.Click += pushAllBagnonButton_Click;
             // 
+            // pushTitanGoldButton
+            // 
+            pushTitanGoldButton.Dock = DockStyle.Fill;
+            pushTitanGoldButton.ImageKey = "Push.png";
+            pushTitanGoldButton.ImageList = globalImageList;
+            pushTitanGoldButton.Location = new Point(3, 58);
+            pushTitanGoldButton.Name = "pushTitanGoldButton";
+            pushTitanGoldButton.Size = new Size(219, 53);
+            pushTitanGoldButton.TabIndex = 6;
+            pushTitanGoldButton.Text = "Push TitanGold";
+            pushTitanGoldButton.TextImageRelation = TextImageRelation.ImageBeforeText;
+            pushBagnonButtonTooltip.SetToolTip(pushTitanGoldButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
+            pushTitanGoldButton.UseVisualStyleBackColor = true;
+            // 
             // wowWtfSyncForm
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1240, 929);
+            ClientSize = new Size(1299, 979);
             Controls.Add(appPanel);
             Name = "wowWtfSyncForm";
             Text = "WoW WTF Sync";
@@ -337,6 +355,7 @@
         private Button pushAuctionatorButton;
         private ToolTip pushAuctionatorButtonTooltip;
         private Button pushNovaWorldBuffsButton;
+        private Button pushAltoholicButton;
         private Button pushTitanGoldButton;
     }
 }

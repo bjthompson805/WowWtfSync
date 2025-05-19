@@ -120,6 +120,17 @@ namespace WowWtfSync.WindowsApp
         private void PushCharacterButton_Click(object sender, EventArgs e)
         {
             ContextMenuStrip contextMenu = new ContextMenuStrip();
+            ToolStripMenuItem altoholicMenuItem = new ToolStripMenuItem("Altoholic");
+            altoholicMenuItem.Click += (s, args) =>
+            {
+                PushAltoholicConfigurationForm pushAltoholicForm =
+                    new PushAltoholicConfigurationForm(
+                        this.characterName,
+                        this.realm,
+                        this.account
+                    );
+                pushAltoholicForm.Show();
+            };
             ToolStripMenuItem auctionatorMenuItem = new ToolStripMenuItem("Auctionator");
             auctionatorMenuItem.Click += (s, args) =>
             {
@@ -142,17 +153,6 @@ namespace WowWtfSync.WindowsApp
                     );
                 pushBagnonForm.Show();
             };
-            ToolStripMenuItem titanGoldMenuItem = new ToolStripMenuItem("TitanGold");
-            titanGoldMenuItem.Click += (s, args) =>
-            {
-                PushTitanGoldConfigurationForm pushTitanGoldForm =
-                    new PushTitanGoldConfigurationForm(
-                        this.characterName,
-                        this.realm,
-                        this.account
-                    );
-                pushTitanGoldForm.Show();
-            };
             ToolStripMenuItem novaWorldBuffsMenuItem = new ToolStripMenuItem("NovaWorldBuffs");
             novaWorldBuffsMenuItem.Click += (s, args) =>
             {
@@ -164,10 +164,22 @@ namespace WowWtfSync.WindowsApp
                     );
                 pushNovaWorldBuffsForm.Show();
             };
+            ToolStripMenuItem titanGoldMenuItem = new ToolStripMenuItem("TitanGold");
+            titanGoldMenuItem.Click += (s, args) =>
+            {
+                PushTitanGoldConfigurationForm pushTitanGoldForm =
+                    new PushTitanGoldConfigurationForm(
+                        this.characterName,
+                        this.realm,
+                        this.account
+                    );
+                pushTitanGoldForm.Show();
+            };
+            contextMenu.Items.Add(altoholicMenuItem);
             contextMenu.Items.Add(auctionatorMenuItem);
             contextMenu.Items.Add(bagnonMenuItem);
-            contextMenu.Items.Add(titanGoldMenuItem);
             contextMenu.Items.Add(novaWorldBuffsMenuItem);
+            contextMenu.Items.Add(titanGoldMenuItem);
             contextMenu.Show(Cursor.Position);
         }
     }

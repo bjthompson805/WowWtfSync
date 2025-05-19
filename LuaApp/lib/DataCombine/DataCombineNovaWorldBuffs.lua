@@ -7,12 +7,12 @@ local thisClass = DataCombine.DataCombine:extend("DataCombine.DataCombineNovaWor
 function thisClass:init() end -- Constructor
 
 function thisClass:combineOne(characterName, realm, sourceAccount, faction, sourceStr, oldDestStr)
-    -- Evaluate the source BagBrother file
+    -- Evaluate the source file
     local sourceNovaWorldBuffsFn = assert(load(sourceStr))
     sourceNovaWorldBuffsFn()
     local sourceNWBdatabase = NWBdatabase
 
-    -- Evaluate the destination BagBrother file
+    -- Evaluate the destination file
     destNovaWorldBuffsFn = assert(load(oldDestStr))
     destNovaWorldBuffsFn()
     local destNWBdatabase = NWBdatabase
@@ -23,9 +23,9 @@ function thisClass:combineOne(characterName, realm, sourceAccount, faction, sour
         sourceNWBdatabase["global"][realm][faction] == nil or
         sourceNWBdatabase["global"][realm][faction]["myChars"] == nil
     ) then
-        self.errorMsg = "Source faction '" .. realm .. "-" .. faction .. "' not '" ..
-            " found in the file for account '" .. sourceAccount .."'. You may need" ..
-            " to log onto the character first."
+        self.errorMsg = "Source faction '" .. realm .. "-" .. faction .. "' not " ..
+            "found in the file for account '" .. sourceAccount .."'. You may need " ..
+            "to log onto the character first."
         return nil
     end
     if (destNWBdatabase["global"] == nil) then

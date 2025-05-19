@@ -16,15 +16,17 @@ When combining, all characters and accounts that are being pushed to must be log
 
 ## Current features
 
-- Combine Bagnon character data across accounts.
-- Combine Auctionator scan data across accounts.
-- Combine TitanGold data across accounts.
-- Combine NovaWorldBuffs data across accounts.
+- Combine data across accounts for the following addons:
+  - Altoholic
+  - Auctionator (scan data)
+  - Bagnon
+  - NovaWorldBuffs
+  - TitanGold
 
 ## Planned features
 
 - Combine other addons' data across accounts.
-- Configure sharing/copying of global settings addons across accounts.
+- Configure sharing/copying of global settings for addons across accounts.
 - Configure sharing/copying of character-specific settings for addons across accounts.
 - Cloud sync of WTF data.
 - Cloud sync of WTF settings.

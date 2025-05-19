@@ -33,6 +33,9 @@
     <None Update="LuaApp\lib\DataCombine\DataCombine.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="LuaApp\lib\DataCombine\DataCombineAltoholic.lua">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="LuaApp\lib\DataCombine\DataCombineAuctionator.lua">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
