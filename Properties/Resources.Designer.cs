@@ -63,6 +63,16 @@ namespace WowWtfSync.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] app_icon {
+            get {
+                object obj = ResourceManager.GetObject("app-icon", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] Cancel {
             get {
                 object obj = ResourceManager.GetObject("Cancel", resourceCulture);
