@@ -29,23 +29,19 @@
             string description = "";
             if (this.pushAllCharacters)
             {
-                description = "Push Altoholic data from each character " +
-                    "to all accounts that are not the same as the character's account.";
+                description = "Push Altoholic data from all accounts, combining the data.";
             }
             else
             {
-                description = $"Push Altoholic data from {this.characterName}-" +
-                    $"{this.realm}-{this.account} to all accounts that are not the " +
-                    "same as the character's account.";
-
+                description = $"Push Altoholic data for {this.characterName}-" +
+                    $"{this.realm}-{this.account} by combining the data to/from all accounts.";
             }
-
-            description += " This will allow you to view characters' gold, bags, banks, reputations, " +
-                "raid lockouts, profession cooldowns, auctions, mail, talents, and other information " +
-                "provided by Altoholic, for characters that are on other accounts.";
 
             description += "\n\nMake sure to log out of all characters that are being pushed " +
                 "to, otherwise the data will be overwritten when logout occurs.";
+
+            description += "\n\n*Aggregation of mail sent to your own character from another account " +
+                "is also supported.";
 
             return description;
         }

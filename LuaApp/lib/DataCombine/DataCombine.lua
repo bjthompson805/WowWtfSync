@@ -38,8 +38,35 @@ function thisClass:combine(characterName, realm, sourceAccount, jsonConfigPath)
             "'."
         return false
     end
+    
+    -- Aggregate data from other accounts into the source account, if needed by the addon.
+    if (self:enableCharacterAccountFileAggregation()) then
+        local success = self:aggregateCharacterAccountFile(
+            characterName,
+            realm,
+            sourceAccount,
+            faction,
+            configTable
+        )
+        if (success ~= true) then
+            self.errorMsg = "Could not aggregate source character '" .. characterName ..
+                "-" .. realm .. "-" .. sourceAccount .. "': " .. self.errorMsg
+            return false
+        end
+    end
 
+    -- Read the source file
     local wtfAccountDir = configTable.WowWtfFolder .. "\\Account"
+    local sourcePath = self:getPath(wtfAccountDir, sourceAccount)
+    local fh = io.open(sourcePath, "rb")
+    if fh == nil then
+        self.errorMsg = "Could not open file '" .. sourcePath .. "'"
+        return false
+    end
+    local sourceStr = fh:read("*all")
+    fh:close()
+    
+    -- Combine the given character into all *other* accounts
     for destAccount in pairs(uniqueAccounts) do
         -- Read the old destination file
         local destPath = self:getPath(wtfAccountDir, destAccount)
@@ -49,16 +76,6 @@ function thisClass:combine(characterName, realm, sourceAccount, jsonConfigPath)
             return false
         end
         local oldDestStr = fh:read("*all")
-        fh:close()
-
-        -- Read the source file
-        local sourcePath = self:getPath(wtfAccountDir, sourceAccount)
-        fh = io.open(sourcePath, "rb")
-        if fh == nil then
-            self.errorMsg = "Could not open file '" .. destPath .. "'"
-            return false
-        end
-        local sourceStr = fh:read("*all")
         fh:close()
 
         -- Combine the character from the source file into the destination file
@@ -102,6 +119,24 @@ function thisClass:combineAll(jsonConfigPath)
         uniqueAccounts[character.Account] = true
     end
     
+    -- Aggregate data from other accounts into the source account, if needed by the addon.
+    if (self:enableCharacterAccountFileAggregation()) then
+        for _, sourceCharacter in ipairs(configTable.AddedCharacters) do
+            local success = self:aggregateCharacterAccountFile(
+                sourceCharacter.CharacterName,
+                sourceCharacter.Realm,
+                sourceCharacter.Account,
+                sourceCharacter.Faction,
+                configTable
+            )
+            if (success ~= true) then
+                self.errorMsg = "Could not aggregate source character '" .. sourceCharacter.CharacterName ..
+                    "-" .. sourceCharacter.Realm .. "-" .. sourceCharacter.Account .. "': " .. self.errorMsg
+                return nil
+            end
+        end
+    end
+    
     local wtfAccountDir = configTable.WowWtfFolder .. "\\Account"
     local accountToNewDestStr = {}
     for account in pairs(uniqueAccounts) do
@@ -118,7 +153,7 @@ function thisClass:combineAll(jsonConfigPath)
     end
 
     -- Combine all characters into all *other* accounts
-    for _,sourceCharacter in ipairs(configTable.AddedCharacters) do
+    for _, sourceCharacter in ipairs(configTable.AddedCharacters) do
         local sourceStr = accountToNewDestStr[sourceCharacter.Account]
         for destAccount, oldDestStr in pairs(accountToNewDestStr) do
             -- Skip account for this character
@@ -193,6 +228,95 @@ end
 function thisClass:getPath(wtfAccountDir, account)
     self.errorMsg = self.name .. ":getPath() is an abstract method and must be implemented."
     return nil
+end
+
+-- This method implements logic to change the file of the account
+-- that a character belongs to prior to having it copied to other accounts, by aggregating
+-- the character's data on other accounts with its data on the account it belongs to.
+-- This is occasionally used when a character's data is able to be changed while logged
+-- onto a different account, such as in DataStore_Mails (Altoholic).
+-- Input:
+--     characterName [string] - the character being copied from
+--     characterRealm [string] - the realm of the character being copied from
+--     characterAccount [string] - the account of the character being copied from
+--     characterFaction [string] - the faction of the character being copied from
+--     configTable [table] - the config table from config.json
+-- Output:
+--     success [boolean] - indicates whether the update to the character account file was successful
+function thisClass:aggregateCharacterAccountFile(
+    characterName,
+    characterRealm,
+    characterAccount,
+    characterFaction,
+    configTable
+)
+    -- Get all unique accounts
+    local otherAccounts = {}
+    for _, character in ipairs(configTable.AddedCharacters) do
+        otherAccounts[character.Account] = true
+    end
+    otherAccounts[characterAccount] = nil
+
+    -- Read the character account file
+    local wtfAccountDir = configTable.WowWtfFolder .. "\\Account"
+    local characterAccountFilePath = self:getPath(wtfAccountDir, characterAccount)
+    local fh = io.open(characterAccountFilePath, "rb")
+    if fh == nil then
+        self.errorMsg = "Could not open file '" .. characterAccountFilePath .. "'"
+        return false
+    end
+    local characterAccountFileStr = fh:read("*all")
+    fh:close()
+    
+    local newCharacterAccountFileStr = characterAccountFileStr
+    for otherAccount in pairs(otherAccounts) do
+        -- Read the other account file
+        local otherAccountFilePath = self:getPath(wtfAccountDir, otherAccount)
+        local fh = io.open(otherAccountFilePath, "rb")
+        if fh == nil then
+            self.errorMsg = "Could not open file '" .. otherAccountFilePath .. "'"
+            return false
+        end
+        local otherAccountFileStr = fh:read("*all")
+        fh:close()
+
+        -- Combine the character from the other account file into the character account
+        -- file (reverse direction!).
+        newCharacterAccountFileStr = self:aggregateOne(
+            characterName,
+            characterRealm,
+            characterAccount,
+            characterFaction,
+            newCharacterAccountFileStr,
+            otherAccount,
+            otherAccountFileStr,
+            configTable
+        )
+        if (newCharacterAccountFileStr == nil) then
+            self.errorMsg = self.name .. ":aggregateOne() failed for character '" ..
+                characterName .. "-" .. characterRealm .. "-" .. characterAccount .. "': " ..
+                self.errorMsg
+            return false
+        end
+    end
+
+    -- Save the new character account file
+    fh = io.open(characterAccountFilePath, "w")
+    if fh == nil then
+        self.errorMsg = "Could not open file '" .. characterAccountFilePath .. "'"
+        return false
+    end
+    fh:write(newCharacterAccountFileStr)
+    fh:close()
+
+    return true
+end
+
+-- This method is used to determine whether the source character should be aggregated
+-- before being copied to other accounts. By default, this is false, but can be overridden
+-- by the addon-specific implementation.
+function thisClass:enableCharacterAccountFileAggregation()
+    return false
 end
 
 return thisClass
