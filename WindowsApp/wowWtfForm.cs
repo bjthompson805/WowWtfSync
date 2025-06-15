@@ -47,6 +47,40 @@ namespace WowWtfSync.WindowsApp
             string workingDirectory = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
             string iconFile = Path.Combine(workingDirectory, "app-icon.ico");
             this.Icon = new Icon(iconFile);
+
+            // Show last pushed message
+            PushConfigurationForm.PushConfigurationFormClosed += (s, e) =>
+            {
+                this.refreshLastPushedMessage();
+            };
+            this.refreshLastPushedMessage();
+        }
+
+        private void refreshLastPushedMessage()
+        {
+
+            string lastPushedMessage = Logger.GetLogMessages("push").LastOrDefault();
+            if (string.IsNullOrEmpty(lastPushedMessage))
+            {
+                lastPushedMessage = "No characters have been pushed yet.";
+            }
+            else
+            {
+                // Remove everything before the timestamp in the last pushed message
+                Regex timestampRegex = new Regex(@"\d+/\d+/\d+ \d+:\d+:\d+");
+                Match timestampMatch = timestampRegex.Match(lastPushedMessage);
+                if (timestampMatch.Success)
+                {
+                    lastPushedMessage = lastPushedMessage
+                        .Substring(timestampMatch.Index)
+                        .Trim();
+                }
+                else
+                {
+                    lastPushedMessage = "No timestamp found in the last pushed message.";
+                }
+            }
+            lastPushedLabel.Text = lastPushedMessage;
         }
 
         private void addCharacterButton_Click(object sender, EventArgs e)

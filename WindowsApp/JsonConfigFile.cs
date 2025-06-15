@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Windows.Forms;
 
 namespace WowWtfSync.WindowsApp
 {
@@ -62,7 +63,24 @@ namespace WowWtfSync.WindowsApp
                 WowWtfFolder = JsonConfigFile.wowWtfFolder
             };
             string jsonString = JsonSerializer.Serialize(jsonConfigFileDto);
-            File.WriteAllText(jsonFile, jsonString);
+            try
+            {
+                File.WriteAllText(jsonFile, jsonString);
+                Logger.Log(
+                    $"Config file saved to {jsonFile}",
+                    LoggerLogTypes.Info
+                );
+            }
+            catch (Exception ex)
+            {
+                Logger.Log($"Failed to write config.json: {ex.Message}", LoggerLogTypes.Error);
+                MessageBox.Show(
+                    $"Failed to write config.json: {ex.Message}",
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
         }
     }
 }

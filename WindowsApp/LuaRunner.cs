@@ -37,6 +37,10 @@ namespace WowWtfSync.WindowsApp
 
                     if (stderr != "")
                     {
+                        Logger.Log(
+                            stderr,
+                            LoggerLogTypes.Error
+                        );
                         MessageBox.Show(
                             stderr,
                             "Error",
@@ -46,6 +50,10 @@ namespace WowWtfSync.WindowsApp
                     }
                     else
                     {
+                        Logger.Log(
+                            stdout,
+                            LoggerLogTypes.Info
+                        );
                         MessageBox.Show(
                             stdout,
                             "Success",
@@ -59,6 +67,10 @@ namespace WowWtfSync.WindowsApp
             }
             catch (Exception ex)
             {
+                Logger.Log(
+                    ex.Message,
+                    LoggerLogTypes.Error
+                );
                 MessageBox.Show(
                     ex.Message,
                     "Error",

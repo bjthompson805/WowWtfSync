@@ -31,6 +31,7 @@
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(wowWtfSyncForm));
             appPanel = new TableLayoutPanel();
+            lastPushedLabel = new Label();
             addCharactersPanel = new TableLayoutPanel();
             addCharacterButton = new Button();
             charactersList = new ListBox();
@@ -61,20 +62,32 @@
             // 
             // appPanel
             // 
+            appPanel.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
             appPanel.ColumnCount = 1;
             appPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            appPanel.Controls.Add(lastPushedLabel, 0, 3);
             appPanel.Controls.Add(addCharactersPanel, 0, 2);
             appPanel.Controls.Add(wowWtfFolderPanel, 0, 0);
             appPanel.Controls.Add(addedCharactersPanel, 0, 1);
             appPanel.Dock = DockStyle.Fill;
             appPanel.Location = new Point(0, 0);
             appPanel.Name = "appPanel";
-            appPanel.RowCount = 3;
+            appPanel.RowCount = 4;
             appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F));
             appPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 350F));
+            appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
             appPanel.Size = new Size(1299, 979);
             appPanel.TabIndex = 22;
+            // 
+            // lastPushedLabel
+            // 
+            lastPushedLabel.Anchor = AnchorStyles.Left;
+            lastPushedLabel.AutoSize = true;
+            lastPushedLabel.Location = new Point(4, 942);
+            lastPushedLabel.Name = "lastPushedLabel";
+            lastPushedLabel.Size = new Size(0, 32);
+            lastPushedLabel.TabIndex = 27;
             // 
             // addCharactersPanel
             // 
@@ -85,18 +98,19 @@
             addCharactersPanel.Controls.Add(charactersList, 1, 0);
             addCharactersPanel.Controls.Add(accountsList, 0, 0);
             addCharactersPanel.Dock = DockStyle.Fill;
-            addCharactersPanel.Location = new Point(3, 632);
+            addCharactersPanel.Location = new Point(4, 590);
             addCharactersPanel.Name = "addCharactersPanel";
             addCharactersPanel.RowCount = 2;
             addCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             addCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 80F));
-            addCharactersPanel.Size = new Size(1293, 344);
+            addCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            addCharactersPanel.Size = new Size(1291, 344);
             addCharactersPanel.TabIndex = 25;
             // 
             // addCharacterButton
             // 
             addCharacterButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            addCharacterButton.Location = new Point(1130, 267);
+            addCharacterButton.Location = new Point(1128, 267);
             addCharacterButton.Name = "addCharacterButton";
             addCharacterButton.Size = new Size(160, 74);
             addCharacterButton.TabIndex = 23;
@@ -108,9 +122,9 @@
             // 
             charactersList.Dock = DockStyle.Fill;
             charactersList.FormattingEnabled = true;
-            charactersList.Location = new Point(487, 3);
+            charactersList.Location = new Point(486, 3);
             charactersList.Name = "charactersList";
-            charactersList.Size = new Size(803, 258);
+            charactersList.Size = new Size(802, 258);
             charactersList.TabIndex = 21;
             // 
             // accountsList
@@ -119,7 +133,7 @@
             accountsList.FormattingEnabled = true;
             accountsList.Location = new Point(3, 3);
             accountsList.Name = "accountsList";
-            accountsList.Size = new Size(478, 258);
+            accountsList.Size = new Size(477, 258);
             accountsList.TabIndex = 20;
             accountsList.SelectedIndexChanged += accountsList_SelectedIndexChanged;
             // 
@@ -134,18 +148,18 @@
             wowWtfFolderPanel.Controls.Add(wowWtfFolderTextbox, 1, 1);
             wowWtfFolderPanel.Controls.Add(label2, 0, 0);
             wowWtfFolderPanel.Dock = DockStyle.Fill;
-            wowWtfFolderPanel.Location = new Point(3, 3);
+            wowWtfFolderPanel.Location = new Point(4, 4);
             wowWtfFolderPanel.Name = "wowWtfFolderPanel";
             wowWtfFolderPanel.RowCount = 1;
             wowWtfFolderPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 65F));
             wowWtfFolderPanel.RowStyles.Add(new RowStyle());
-            wowWtfFolderPanel.Size = new Size(1293, 114);
+            wowWtfFolderPanel.Size = new Size(1291, 114);
             wowWtfFolderPanel.TabIndex = 24;
             // 
             // scanButton
             // 
             scanButton.Anchor = AnchorStyles.Right;
-            scanButton.Location = new Point(1188, 68);
+            scanButton.Location = new Point(1186, 68);
             scanButton.Name = "scanButton";
             scanButton.Size = new Size(102, 42);
             scanButton.TabIndex = 12;
@@ -167,7 +181,7 @@
             wowWtfFolderTextbox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             wowWtfFolderTextbox.Location = new Point(211, 70);
             wowWtfFolderTextbox.Name = "wowWtfFolderTextbox";
-            wowWtfFolderTextbox.Size = new Size(971, 39);
+            wowWtfFolderTextbox.Size = new Size(969, 39);
             wowWtfFolderTextbox.TabIndex = 8;
             // 
             // label2
@@ -176,7 +190,7 @@
             label2.Dock = DockStyle.Fill;
             label2.Location = new Point(3, 0);
             label2.Name = "label2";
-            label2.Size = new Size(1287, 65);
+            label2.Size = new Size(1285, 65);
             label2.TabIndex = 6;
             label2.Text = "Welcome to WoW WTF Sync! This Windows application will allow you to combine data from your WoW WTF folder across accounts.";
             // 
@@ -187,12 +201,12 @@
             addedCharactersPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             addedCharactersPanel.Controls.Add(addedCharactersToolbar, 0, 0);
             addedCharactersPanel.Dock = DockStyle.Fill;
-            addedCharactersPanel.Location = new Point(3, 123);
+            addedCharactersPanel.Location = new Point(4, 125);
             addedCharactersPanel.Name = "addedCharactersPanel";
             addedCharactersPanel.RowCount = 2;
             addedCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F));
             addedCharactersPanel.RowStyles.Add(new RowStyle());
-            addedCharactersPanel.Size = new Size(1293, 503);
+            addedCharactersPanel.Size = new Size(1291, 458);
             addedCharactersPanel.TabIndex = 26;
             // 
             // addedCharactersToolbar
@@ -216,7 +230,7 @@
             addedCharactersToolbar.RowCount = 2;
             addedCharactersToolbar.RowStyles.Add(new RowStyle(SizeType.Absolute, 55F));
             addedCharactersToolbar.RowStyles.Add(new RowStyle());
-            addedCharactersToolbar.Size = new Size(1287, 114);
+            addedCharactersToolbar.Size = new Size(1285, 114);
             addedCharactersToolbar.TabIndex = 0;
             addedCharactersToolbar.Visible = false;
             // 
@@ -327,6 +341,7 @@
             Name = "wowWtfSyncForm";
             Text = "WoW WTF Sync";
             appPanel.ResumeLayout(false);
+            appPanel.PerformLayout();
             addCharactersPanel.ResumeLayout(false);
             wowWtfFolderPanel.ResumeLayout(false);
             wowWtfFolderPanel.PerformLayout();
@@ -358,5 +373,6 @@
         private Button pushNovaWorldBuffsButton;
         private Button pushAltoholicButton;
         private Button pushTitanGoldButton;
+        private Label lastPushedLabel;
     }
 }

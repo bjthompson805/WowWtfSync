@@ -20,6 +20,10 @@ namespace WowWtfSync.WindowsApp
         protected string realm;
         protected string account;
 
+        // Create an event handler for when this form is closed.
+        public delegate void PushConfigurationFormClosedEventHandler(object sender, EventArgs e);
+        public static event PushConfigurationFormClosedEventHandler PushConfigurationFormClosed;
+
         public PushConfigurationForm()
         {
             this.pushAllCharacters = true;
@@ -44,6 +48,10 @@ namespace WowWtfSync.WindowsApp
             this.pushConfigTitle.Text = this.GetTitle();
             this.pushConfigDescription.Text = this.GetDescription();
             this.Text = "Push Configuration";
+            this.FormClosed += (sender, e) =>
+            {
+                PushConfigurationFormClosed?.Invoke(sender, e);
+            };
         }
 
         private void InitializeComponent()
@@ -150,19 +158,23 @@ namespace WowWtfSync.WindowsApp
             argList.Add(addonName);
             argList.Add('"' + Path.Combine(workingDirectory, "config.json") + '"');
 
+            string logMessage = $"Pushed addon {addonName} for ";
             if (this.pushAllCharacters)
             {
                 argList.Add("all");
+                logMessage += "all characters.";
             }
             else
             {
                 argList.Add(this.characterName + "-" + this.realm + "-" + this.account);
+                logMessage += $"character {this.realm}-{this.characterName}-{this.account}.";
             }
 
             Button pushButton = (Button)sender;
             pushButton.Text = "Pushing...";
             pushButton.Enabled = false;
             LuaRunner.Run(argList);
+            Logger.Log(logMessage, LoggerLogTypes.Info, "push");
             this.Close();
         }
     }
