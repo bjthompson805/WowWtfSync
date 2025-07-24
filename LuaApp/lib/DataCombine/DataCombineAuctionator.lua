@@ -69,8 +69,25 @@ function thisClass:combineOne(
         else
             -- Combine the item data
             local destItemData = destAuctionatorPriceDatabase[priceDbKey][itemID]
-            local destItemDataDeserialized = cbor:Deserialize(destItemData)
-            local sourceItemDataDeserialized = cbor:Deserialize(sourceItemData)
+            local destItemDataDeserialized = destItemData
+            local sourceItemDataDeserialized = sourceItemData
+            if (type(destItemDataDeserialized) == "string") then
+                -- Needs to be deserialized
+                destItemDataDeserialized = cbor:Deserialize(destItemDataDeserialized)
+            end
+            if (type(destItemDataDeserialized) == "string") then
+                -- Needs to be deserialized
+                sourceItemDataDeserialized = cbor:Deserialize(sourceItemDataDeserialized)
+            end
+
+            if (type(sourceItemDataDeserialized) ~= "table" or
+                type(destItemDataDeserialized) ~= "table"
+            ) then
+                -- If the source or destination item data is not a table, then skip it
+                -- as it is not valid.
+                goto nextItem
+            end
+
             local destMostRecentDay = self:getMostRecentDay(destItemDataDeserialized)
             local sourceMostRecentDay = self:getMostRecentDay(sourceItemDataDeserialized)
 
@@ -92,9 +109,16 @@ function thisClass:combineOne(
                 destItemDataDeserialized["m"] = sourceItemDataDeserialized["m"]
             end
 
-            destAuctionatorPriceDatabase[priceDbKey][itemID] =
-                cbor:Serialize(destItemDataDeserialized)
+            local newDestItemData = destItemDataDeserialized
+            if (type(destItemData) == "string") then
+                -- Needs to be serialized
+                newDestItemData = cbor:Serialize(newDestItemData)
+            end
+
+            destAuctionatorPriceDatabase[priceDbKey][itemID] = newDestItemData
         end
+
+        ::nextItem::
     end
 
     -- Return the new destination string
