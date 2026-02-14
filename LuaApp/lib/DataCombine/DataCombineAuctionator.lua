@@ -64,6 +64,19 @@ function thisClass:combineOne(
             destAuctionatorPriceDatabase[priceDbKey] = {}
         end
 
+        if (type(destAuctionatorPriceDatabase[priceDbKey]) == "string") then
+            -- Needs to be deserialized
+            destAuctionatorPriceDatabase[priceDbKey] = cbor:Deserialize(destAuctionatorPriceDatabase[priceDbKey])
+        end
+
+        if (type(destAuctionatorPriceDatabase[priceDbKey]) ~= "table") then
+            -- If the destination price database is not a table, then it's not valid
+            -- and we need to throw an error.
+            self.errorMsg = "Destination price database for realm '" .. realm ..
+                "' and faction '" .. faction .. "' is not a table."
+            return nil
+        end
+
         if (destAuctionatorPriceDatabase[priceDbKey][itemID] == nil) then
             destAuctionatorPriceDatabase[priceDbKey][itemID] = sourceItemData
         else
@@ -75,7 +88,7 @@ function thisClass:combineOne(
                 -- Needs to be deserialized
                 destItemDataDeserialized = cbor:Deserialize(destItemDataDeserialized)
             end
-            if (type(destItemDataDeserialized) == "string") then
+            if (type(sourceItemDataDeserialized) == "string") then
                 -- Needs to be deserialized
                 sourceItemDataDeserialized = cbor:Deserialize(sourceItemDataDeserialized)
             end
