@@ -53,12 +53,21 @@ function thisClass:combineOne(
     end
 
     local priceDbKey = realm .. " " .. faction
+    local cbor = require "LibCBOR"
+    if (type(destAuctionatorPriceDatabase[priceDbKey]) == "string") then
+        -- Needs to be deserialized
+        destAuctionatorPriceDatabase[priceDbKey] = cbor:Deserialize(destAuctionatorPriceDatabase[priceDbKey])
+    end
+    if (type(sourceAuctionatorPriceDatabase[priceDbKey]) == "string") then
+        -- Needs to be deserialized
+        sourceAuctionatorPriceDatabase[priceDbKey] = cbor:Deserialize(sourceAuctionatorPriceDatabase[priceDbKey])
+    end
+
     if (type(sourceAuctionatorPriceDatabase[priceDbKey]) ~= "table") then
         -- Price database is empty, so skip it
         return oldDestStr
     end
 
-    local cbor = require "LibCBOR"
     for itemID, sourceItemData in pairs(sourceAuctionatorPriceDatabase[priceDbKey]) do
         if (destAuctionatorPriceDatabase[priceDbKey] == nil) then
             destAuctionatorPriceDatabase[priceDbKey] = {}
@@ -75,7 +84,7 @@ function thisClass:combineOne(
                 -- Needs to be deserialized
                 destItemDataDeserialized = cbor:Deserialize(destItemDataDeserialized)
             end
-            if (type(destItemDataDeserialized) == "string") then
+            if (type(sourceItemDataDeserialized) == "string") then
                 -- Needs to be deserialized
                 sourceItemDataDeserialized = cbor:Deserialize(sourceItemDataDeserialized)
             end
