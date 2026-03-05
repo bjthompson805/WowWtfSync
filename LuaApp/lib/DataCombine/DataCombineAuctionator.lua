@@ -69,7 +69,9 @@ function thisClass:combineOne(
     end
 
     for itemID, sourceItemData in pairs(sourceAuctionatorPriceDatabase[priceDbKey]) do
-        if (destAuctionatorPriceDatabase[priceDbKey] == nil) then
+        if (destAuctionatorPriceDatabase[priceDbKey] == nil or
+            type(destAuctionatorPriceDatabase[priceDbKey]) == "number"
+        ) then
             destAuctionatorPriceDatabase[priceDbKey] = {}
         end
 
