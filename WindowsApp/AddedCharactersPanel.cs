@@ -2,6 +2,7 @@
 {
     public class AddedCharactersPanel : TableLayoutPanel
     {
+        public List<string> availableRealms;
         public List<AddedCharacter> addedCharacters;
         public string wtfAccountDir;
         public ImageList addedCharacterImageList;

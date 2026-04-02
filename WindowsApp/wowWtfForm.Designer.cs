@@ -77,7 +77,7 @@
             appPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 350F));
             appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 40F));
-            appPanel.Size = new Size(1299, 979);
+            appPanel.Size = new Size(1574, 979);
             appPanel.TabIndex = 22;
             // 
             // lastPushedLabel
@@ -104,13 +104,13 @@
             addCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             addCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 80F));
             addCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
-            addCharactersPanel.Size = new Size(1291, 344);
+            addCharactersPanel.Size = new Size(1566, 344);
             addCharactersPanel.TabIndex = 25;
             // 
             // addCharacterButton
             // 
             addCharacterButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            addCharacterButton.Location = new Point(1128, 267);
+            addCharacterButton.Location = new Point(1403, 267);
             addCharacterButton.Name = "addCharacterButton";
             addCharacterButton.Size = new Size(160, 74);
             addCharacterButton.TabIndex = 23;
@@ -122,9 +122,9 @@
             // 
             charactersList.Dock = DockStyle.Fill;
             charactersList.FormattingEnabled = true;
-            charactersList.Location = new Point(486, 3);
+            charactersList.Location = new Point(589, 3);
             charactersList.Name = "charactersList";
-            charactersList.Size = new Size(802, 258);
+            charactersList.Size = new Size(974, 258);
             charactersList.TabIndex = 21;
             // 
             // accountsList
@@ -133,7 +133,7 @@
             accountsList.FormattingEnabled = true;
             accountsList.Location = new Point(3, 3);
             accountsList.Name = "accountsList";
-            accountsList.Size = new Size(477, 258);
+            accountsList.Size = new Size(580, 258);
             accountsList.TabIndex = 20;
             accountsList.SelectedIndexChanged += accountsList_SelectedIndexChanged;
             // 
@@ -153,13 +153,13 @@
             wowWtfFolderPanel.RowCount = 1;
             wowWtfFolderPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 65F));
             wowWtfFolderPanel.RowStyles.Add(new RowStyle());
-            wowWtfFolderPanel.Size = new Size(1291, 114);
+            wowWtfFolderPanel.Size = new Size(1566, 114);
             wowWtfFolderPanel.TabIndex = 24;
             // 
             // scanButton
             // 
             scanButton.Anchor = AnchorStyles.Right;
-            scanButton.Location = new Point(1186, 68);
+            scanButton.Location = new Point(1461, 68);
             scanButton.Name = "scanButton";
             scanButton.Size = new Size(102, 42);
             scanButton.TabIndex = 12;
@@ -181,7 +181,7 @@
             wowWtfFolderTextbox.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             wowWtfFolderTextbox.Location = new Point(211, 70);
             wowWtfFolderTextbox.Name = "wowWtfFolderTextbox";
-            wowWtfFolderTextbox.Size = new Size(969, 39);
+            wowWtfFolderTextbox.Size = new Size(1244, 39);
             wowWtfFolderTextbox.TabIndex = 8;
             // 
             // label2
@@ -190,9 +190,10 @@
             label2.Dock = DockStyle.Fill;
             label2.Location = new Point(3, 0);
             label2.Name = "label2";
-            label2.Size = new Size(1285, 65);
+            label2.Size = new Size(1560, 65);
             label2.TabIndex = 6;
             label2.Text = "Welcome to WoW WTF Sync! This Windows application will allow you to combine data from your WoW WTF folder across accounts.";
+            label2.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // addedCharactersPanel
             // 
@@ -206,19 +207,20 @@
             addedCharactersPanel.RowCount = 2;
             addedCharactersPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 120F));
             addedCharactersPanel.RowStyles.Add(new RowStyle());
-            addedCharactersPanel.Size = new Size(1291, 458);
+            addedCharactersPanel.Size = new Size(1566, 458);
             addedCharactersPanel.TabIndex = 26;
             // 
             // addedCharactersToolbar
             // 
-            addedCharactersToolbar.ColumnCount = 6;
+            addedCharactersToolbar.ColumnCount = 7;
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 225F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 300F));
+            addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
             addedCharactersToolbar.ColumnStyles.Add(new ColumnStyle());
-            addedCharactersToolbar.Controls.Add(pushTitanGoldButton, 0, 1);
+            addedCharactersToolbar.Controls.Add(pushTitanGoldButton, 5, 0);
             addedCharactersToolbar.Controls.Add(pushAltoholicButton, 1, 0);
             addedCharactersToolbar.Controls.Add(pushNovaWorldBuffsButton, 4, 0);
             addedCharactersToolbar.Controls.Add(pushAuctionatorButton, 2, 0);
@@ -230,7 +232,7 @@
             addedCharactersToolbar.RowCount = 2;
             addedCharactersToolbar.RowStyles.Add(new RowStyle(SizeType.Absolute, 55F));
             addedCharactersToolbar.RowStyles.Add(new RowStyle());
-            addedCharactersToolbar.Size = new Size(1285, 114);
+            addedCharactersToolbar.Size = new Size(1560, 114);
             addedCharactersToolbar.TabIndex = 0;
             addedCharactersToolbar.Visible = false;
             // 
@@ -239,10 +241,10 @@
             pushTitanGoldButton.Dock = DockStyle.Fill;
             pushTitanGoldButton.ImageKey = "Push.png";
             pushTitanGoldButton.ImageList = globalImageList;
-            pushTitanGoldButton.Location = new Point(3, 58);
+            pushTitanGoldButton.Location = new Point(1253, 3);
             pushTitanGoldButton.Name = "pushTitanGoldButton";
-            pushTitanGoldButton.Size = new Size(219, 53);
-            pushTitanGoldButton.TabIndex = 6;
+            pushTitanGoldButton.Size = new Size(244, 49);
+            pushTitanGoldButton.TabIndex = 7;
             pushTitanGoldButton.Text = "Push TitanGold";
             pushTitanGoldButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             pushBagnonButtonTooltip.SetToolTip(pushTitanGoldButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
@@ -336,7 +338,7 @@
             // 
             AutoScaleDimensions = new SizeF(13F, 32F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1299, 979);
+            ClientSize = new Size(1574, 979);
             Controls.Add(appPanel);
             Name = "wowWtfSyncForm";
             Text = "WoW WTF Sync";
@@ -371,8 +373,8 @@
         private Button pushAuctionatorButton;
         private ToolTip pushAuctionatorButtonTooltip;
         private Button pushNovaWorldBuffsButton;
-        private Button pushAltoholicButton;
-        private Button pushTitanGoldButton;
         private Label lastPushedLabel;
+        private Button pushTitanGoldButton;
+        private Button pushAltoholicButton;
     }
 }
