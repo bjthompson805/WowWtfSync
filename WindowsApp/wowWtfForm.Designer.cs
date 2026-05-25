@@ -53,13 +53,55 @@
             pushBagnonButtonTooltip = new ToolTip(components);
             removeAllButtonTooltip = new ToolTip(components);
             pushAuctionatorButtonTooltip = new ToolTip(components);
+            mainMenuStrip = new System.Windows.Forms.MenuStrip();
+            accountMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            myAccountMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            signOutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            mainMenuStrip.SuspendLayout();
             appPanel.SuspendLayout();
             addCharactersPanel.SuspendLayout();
             wowWtfFolderPanel.SuspendLayout();
             addedCharactersPanel.SuspendLayout();
             addedCharactersToolbar.SuspendLayout();
             SuspendLayout();
-            // 
+            //
+            // mainMenuStrip
+            //
+            this.mainMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+                this.accountMenuItem
+            });
+            this.mainMenuStrip.Location = new System.Drawing.Point(0, 0);
+            this.mainMenuStrip.Name = "mainMenuStrip";
+            this.mainMenuStrip.Size = new System.Drawing.Size(1299, 24);
+            this.mainMenuStrip.TabIndex = 100;
+            //
+            // accountMenuItem
+            //
+            this.accountMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+                this.myAccountMenuItem,
+                this.toolStripSeparator1,
+                this.signOutMenuItem,
+            });
+            this.accountMenuItem.Name = "accountMenuItem";
+            this.accountMenuItem.Text = "Account";
+            //
+            // myAccountMenuItem
+            //
+            this.myAccountMenuItem.Name = "myAccountMenuItem";
+            this.myAccountMenuItem.Text = "My Account…";
+            this.myAccountMenuItem.Click += new System.EventHandler(this.myAccountMenuItem_Click);
+            //
+            // toolStripSeparator1
+            //
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            //
+            // signOutMenuItem
+            //
+            this.signOutMenuItem.Name = "signOutMenuItem";
+            this.signOutMenuItem.Text = "Sign Out";
+            this.signOutMenuItem.Click += new System.EventHandler(this.signOutMenuItem_Click);
+            //
             // appPanel
             // 
             appPanel.CellBorderStyle = TableLayoutPanelCellBorderStyle.Single;
@@ -338,6 +380,8 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1299, 979);
             Controls.Add(appPanel);
+            Controls.Add(mainMenuStrip);
+            MainMenuStrip = mainMenuStrip;
             Name = "wowWtfSyncForm";
             Text = "WoW WTF Sync";
             appPanel.ResumeLayout(false);
@@ -347,7 +391,10 @@
             wowWtfFolderPanel.PerformLayout();
             addedCharactersPanel.ResumeLayout(false);
             addedCharactersToolbar.ResumeLayout(false);
+            mainMenuStrip.ResumeLayout(false);
+            mainMenuStrip.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -374,5 +421,10 @@
         private Button pushAltoholicButton;
         private Button pushTitanGoldButton;
         private Label lastPushedLabel;
+        private System.Windows.Forms.MenuStrip mainMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem accountMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem myAccountMenuItem;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
+        private System.Windows.Forms.ToolStripMenuItem signOutMenuItem;
     }
 }

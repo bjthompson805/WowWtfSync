@@ -7,10 +7,16 @@ namespace WowWtfSync.WindowsApp
     public partial class wowWtfSyncForm : Form
     {
         private List<string> characterDirs; // Full paths of character dirs in all accounts
+        private UserInfo _userInfo;         // Account / license info retrieved on startup
 
-        public wowWtfSyncForm()
+        public wowWtfSyncForm(UserInfo userInfo)
         {
             InitializeComponent();
+            _userInfo = userInfo;
+
+            // Show the signed-in username in the Account menu
+            accountMenuItem.Text = $"Account  ({userInfo.Username})";
+
             this.InitializeApplication();
             this.characterDirs = new List<string>();
         }
@@ -294,6 +300,31 @@ namespace WowWtfSync.WindowsApp
             PushAltoholicConfigurationForm pushAltoholicConfigurationForm =
                 new PushAltoholicConfigurationForm();
             pushAltoholicConfigurationForm.Show();
+        }
+
+        // ── Account menu ─────────────────────────────────────────────────────────
+
+        private void myAccountMenuItem_Click(object sender, EventArgs e)
+        {
+            using var accountInfoForm = new AccountInfoForm(_userInfo);
+            accountInfoForm.ShowDialog(this);
+        }
+
+        private void signOutMenuItem_Click(object sender, EventArgs e)
+        {
+            var confirm = MessageBox.Show(
+                "Are you sure you want to sign out?\n\nThe application will restart and you will need to sign in again.",
+                "Sign Out",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (confirm == DialogResult.Yes)
+            {
+                JsonConfigFile.RefreshToken = null;
+                JsonConfigFile.Save();
+                Application.Restart();
+            }
         }
     }
 }

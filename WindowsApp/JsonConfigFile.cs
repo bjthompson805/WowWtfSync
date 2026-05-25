@@ -15,6 +15,12 @@ namespace WowWtfSync.WindowsApp
         public static string wowWtfFolder = "";
         public static List<AddedCharacterDto> addedCharacters = new List<AddedCharacterDto>();
 
+        /// <summary>
+        /// Persisted JWT refresh token — used to silently re-authenticate on next launch.
+        /// Null when the user has not logged in or has signed out.
+        /// </summary>
+        public static string? RefreshToken = null;
+
         /*
          * This method reads the config.json file and sets the appropriate class members,
          * or, if the file doesn't exist, it will create it with default values.
@@ -41,6 +47,7 @@ namespace WowWtfSync.WindowsApp
                 {
                     JsonConfigFile.wowWtfFolder = jsonConfigFileDto.WowWtfFolder;
                     JsonConfigFile.addedCharacters = jsonConfigFileDto.AddedCharacters;
+                    JsonConfigFile.RefreshToken = jsonConfigFileDto.RefreshToken;
                 }
             }
             else
@@ -60,7 +67,8 @@ namespace WowWtfSync.WindowsApp
             JsonConfigFileDto jsonConfigFileDto = new JsonConfigFileDto
             {
                 AddedCharacters = JsonConfigFile.addedCharacters,
-                WowWtfFolder = JsonConfigFile.wowWtfFolder
+                WowWtfFolder = JsonConfigFile.wowWtfFolder,
+                RefreshToken = JsonConfigFile.RefreshToken
             };
             string jsonString = JsonSerializer.Serialize(jsonConfigFileDto);
             try

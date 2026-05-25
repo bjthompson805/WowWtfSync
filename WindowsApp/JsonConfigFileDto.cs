@@ -9,6 +9,12 @@
         public List<AddedCharacterDto> AddedCharacters { get; set; }
         public string WowWtfFolder { get; set; }
 
+        /// <summary>
+        /// Stored refresh token for silent re-authentication on next launch.
+        /// Null when the user has not logged in or has explicitly signed out.
+        /// </summary>
+        public string? RefreshToken { get; set; }
+
         public JsonConfigFileDto()
         {
             this.AddedCharacters = new List<AddedCharacterDto>();
