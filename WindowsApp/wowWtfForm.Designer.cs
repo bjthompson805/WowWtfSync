@@ -243,7 +243,7 @@
             pushTitanGoldButton.Name = "pushTitanGoldButton";
             pushTitanGoldButton.Size = new Size(219, 53);
             pushTitanGoldButton.TabIndex = 6;
-            pushTitanGoldButton.Text = "Push TitanGold";
+            pushTitanGoldButton.Text = "TitanGold";
             pushTitanGoldButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             pushBagnonButtonTooltip.SetToolTip(pushTitanGoldButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
             pushTitanGoldButton.UseVisualStyleBackColor = true;
@@ -266,7 +266,7 @@
             pushAltoholicButton.Name = "pushAltoholicButton";
             pushAltoholicButton.Size = new Size(219, 49);
             pushAltoholicButton.TabIndex = 5;
-            pushAltoholicButton.Text = "Push Altoholic";
+            pushAltoholicButton.Text = "Altoholic";
             pushAltoholicButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             pushBagnonButtonTooltip.SetToolTip(pushAltoholicButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
             pushAltoholicButton.UseVisualStyleBackColor = true;
@@ -281,7 +281,7 @@
             pushNovaWorldBuffsButton.Name = "pushNovaWorldBuffsButton";
             pushNovaWorldBuffsButton.Size = new Size(294, 49);
             pushNovaWorldBuffsButton.TabIndex = 4;
-            pushNovaWorldBuffsButton.Text = "Push NovaWorldBuffs";
+            pushNovaWorldBuffsButton.Text = "NovaWorldBuffs";
             pushNovaWorldBuffsButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             pushBagnonButtonTooltip.SetToolTip(pushNovaWorldBuffsButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
             pushNovaWorldBuffsButton.UseVisualStyleBackColor = true;
@@ -296,7 +296,7 @@
             pushAuctionatorButton.Name = "pushAuctionatorButton";
             pushAuctionatorButton.Size = new Size(244, 49);
             pushAuctionatorButton.TabIndex = 2;
-            pushAuctionatorButton.Text = "Push Auctionator";
+            pushAuctionatorButton.Text = "Auctionator";
             pushAuctionatorButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             pushAuctionatorButtonTooltip.SetToolTip(pushAuctionatorButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
             pushAuctionatorButton.UseVisualStyleBackColor = true;
@@ -326,7 +326,7 @@
             pushBagnonButton.Name = "pushBagnonButton";
             pushBagnonButton.Size = new Size(244, 49);
             pushBagnonButton.TabIndex = 1;
-            pushBagnonButton.Text = "Push Bagnon";
+            pushBagnonButton.Text = "Bagnon";
             pushBagnonButton.TextImageRelation = TextImageRelation.ImageBeforeText;
             pushBagnonButtonTooltip.SetToolTip(pushBagnonButton, "Open the push configuration dialog for pushing all characters' data listed below to all other accounts.");
             pushBagnonButton.UseVisualStyleBackColor = true;
