@@ -10,6 +10,14 @@
     <ApplicationIcon>app-icon.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <OutputPath>bin/Debug/net9.0-windows/</OutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <OutputPath>bin/Release/net9.0-windows/</OutputPath>
+  </PropertyGroup>
+
   <ItemGroup>
     <Content Include="app-icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
