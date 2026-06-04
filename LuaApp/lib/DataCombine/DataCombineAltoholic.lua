@@ -78,8 +78,16 @@ function thisClass:combineOne(
 end
 
 function thisClass:getPath(wtfAccountDir, account)
-    return wtfAccountDir .. "\\" .. account .. "\\SavedVariables\\" .. self.altoholicAddon ..
-        ".lua"
+    local pathSeparator = string.sub(package.config, 1, 1)
+    return table.concat(
+        {
+            wtfAccountDir,
+            account,
+            "SavedVariables",
+            self.altoholicAddon .. ".lua"
+        },
+        pathSeparator
+    )
 end
 
 function thisClass:getAltoholicAddons()

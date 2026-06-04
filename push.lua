@@ -1,6 +1,11 @@
 
 -- Set path of 3rd party packages (lua_modules) and our modules (lib).
-package.path = package.path .. ";.\\LuaApp\\lua_modules\\?.lua;.\\LuaApp\\lib\\?.lua"
+local pathSeparator = string.sub(package.config, 1, 1)
+local modulePaths = {
+    table.concat({".", "LuaApp", "lua_modules", "?.lua"}, pathSeparator),
+    table.concat({".", "LuaApp", "lib", "?.lua"}, pathSeparator)
+}
+package.path = package.path .. ";" .. table.concat(modulePaths, ";")
 
 require "requireNested" -- Allow for instantiation of modules in nested directories
 require "DataCombine.DataCombineFactory"
@@ -78,7 +83,7 @@ end
 if (character == "all") then
     print(
         "'" .. addonName .. "' data has been successfully combined for " ..
-        "all characters by pushing from the character to all *other* accounts."
+        "all enabled characters by pushing from the character to all *other* accounts."
     )
 else
     local characterName, realm, account = splitCharacter(character)

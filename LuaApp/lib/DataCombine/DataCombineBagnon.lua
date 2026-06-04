@@ -35,7 +35,16 @@ function thisClass:combineOne(characterName, realm, sourceAccount, faction, sour
 end
 
 function thisClass:getPath(wtfAccountDir, account)
-    return wtfAccountDir .. "\\" .. account .. "\\SavedVariables\\BagBrother.lua"
+    local pathSeparator = string.sub(package.config, 1, 1)
+    return table.concat(
+        {
+            wtfAccountDir,
+            account,
+            "SavedVariables",
+            "BagBrother.lua"
+        },
+        pathSeparator
+    )
 end
 
 return thisClass

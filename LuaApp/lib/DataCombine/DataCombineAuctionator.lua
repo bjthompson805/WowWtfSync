@@ -155,7 +155,16 @@ function thisClass:getMostRecentDay(itemData)
 end
 
 function thisClass:getPath(wtfAccountDir, account)
-    return wtfAccountDir .. "\\" .. account .. "\\SavedVariables\\Auctionator.lua"
+    local pathSeparator = string.sub(package.config, 1, 1)
+    return table.concat(
+        {
+            wtfAccountDir,
+            account,
+            "SavedVariables",
+            "Auctionator.lua"
+        },
+        pathSeparator
+    )
 end
 
 return thisClass

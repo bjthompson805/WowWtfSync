@@ -20,14 +20,14 @@ function thisClass:combine(characterName, realm, sourceAccount, jsonConfigPath)
     local faction = nil
 
     -- Get all unique accounts as well as the faction of the character
-    for _, character in ipairs(configTable.AddedCharacters) do
-        uniqueAccounts[character.Account] = true
+    for _, character in ipairs(configTable.characters) do
+        uniqueAccounts[character.account] = true
 
-        if (character.CharacterName == characterName and
-            character.Realm == realm and
-            character.Account == sourceAccount
+        if (character.characterName == characterName and
+            character.realmName == realm and
+            character.account == sourceAccount
         ) then
-            faction = character.Faction
+            faction = character.faction
         end
     end
     uniqueAccounts[sourceAccount] = nil -- Remove the current account
@@ -56,7 +56,8 @@ function thisClass:combine(characterName, realm, sourceAccount, jsonConfigPath)
     end
 
     -- Read the source file
-    local wtfAccountDir = configTable.WowWtfFolder .. "\\Account"
+    local pathSeparator = string.sub(package.config, 1, 1)
+    local wtfAccountDir = configTable.wtfPath .. pathSeparator .. "Account"
     local sourcePath = self:getPath(wtfAccountDir, sourceAccount)
     local fh = io.open(sourcePath, "rb")
     if fh == nil then
@@ -115,29 +116,39 @@ function thisClass:combineAll(jsonConfigPath)
     local util = require("Util")
     local configTable = util:getJsonConfigTable(jsonConfigPath)
     local uniqueAccounts = {}
-    for _, character in ipairs(configTable.AddedCharacters) do
-        uniqueAccounts[character.Account] = true
+    local enabledCharacters = {}
+    for _, character in ipairs(configTable.characters) do
+        uniqueAccounts[character.account] = true
+        if character.enabled then
+            table.insert(enabledCharacters, character)
+        end
+    end
+
+    if #enabledCharacters == 0 then
+        self.errorMsg = "There are no enabled characters to push for."
+        return nil
     end
     
     -- Aggregate data from other accounts into the source account, if needed by the addon.
     if (self:enableCharacterAccountFileAggregation()) then
-        for _, sourceCharacter in ipairs(configTable.AddedCharacters) do
+        for _, sourceCharacter in ipairs(enabledCharacters) do
             local success = self:aggregateCharacterAccountFile(
-                sourceCharacter.CharacterName,
-                sourceCharacter.Realm,
-                sourceCharacter.Account,
-                sourceCharacter.Faction,
+                sourceCharacter.characterName,
+                sourceCharacter.realmName,
+                sourceCharacter.account,
+                sourceCharacter.faction,
                 configTable
             )
             if (success ~= true) then
-                self.errorMsg = "Could not aggregate source character '" .. sourceCharacter.CharacterName ..
-                    "-" .. sourceCharacter.Realm .. "-" .. sourceCharacter.Account .. "': " .. self.errorMsg
+                self.errorMsg = "Could not aggregate source character '" .. sourceCharacter.characterName ..
+                    "-" .. sourceCharacter.realmName .. "-" .. sourceCharacter.account .. "': " .. self.errorMsg
                 return nil
             end
         end
     end
-    
-    local wtfAccountDir = configTable.WowWtfFolder .. "\\Account"
+
+    local pathSeparator = string.sub(package.config, 1, 1)
+    local wtfAccountDir = configTable.wtfPath .. pathSeparator .. "Account"
     local accountToNewDestStr = {}
     for account in pairs(uniqueAccounts) do
         local path = self:getPath(wtfAccountDir, account)
@@ -153,18 +164,18 @@ function thisClass:combineAll(jsonConfigPath)
     end
 
     -- Combine all characters into all *other* accounts
-    for _, sourceCharacter in ipairs(configTable.AddedCharacters) do
-        local sourceStr = accountToNewDestStr[sourceCharacter.Account]
+    for _, sourceCharacter in ipairs(enabledCharacters) do
+        local sourceStr = accountToNewDestStr[sourceCharacter.account]
         for destAccount, oldDestStr in pairs(accountToNewDestStr) do
             -- Skip account for this character
-            if sourceCharacter.Account == destAccount then goto continue end
+            if sourceCharacter.account == destAccount then goto continue end
 
             -- Combine
             local newDestStr = self:combineOne(
-                sourceCharacter.CharacterName,
-                sourceCharacter.Realm,
-                sourceCharacter.Account,
-                sourceCharacter.Faction,
+                sourceCharacter.characterName,
+                sourceCharacter.realmName,
+                sourceCharacter.account,
+                sourceCharacter.faction,
                 sourceStr,
                 oldDestStr,
                 configTable,
@@ -172,8 +183,8 @@ function thisClass:combineAll(jsonConfigPath)
             )
             if (newDestStr == nil) then
                 self.errorMsg = self.name .. ":combineOne() failed for character '" ..
-                    sourceCharacter.CharacterName .. "-" .. sourceCharacter.Realm ..
-                    "-" .. sourceCharacter.Account .. "': " .. self.errorMsg
+                    sourceCharacter.characterName .. "-" .. sourceCharacter.realmName ..
+                    "-" .. sourceCharacter.account .. "': " .. self.errorMsg
                 return nil
             end
             accountToNewDestStr[destAccount] = newDestStr
@@ -194,7 +205,7 @@ function thisClass:combineAll(jsonConfigPath)
         fh:close()
     end
 
-    return configTable.AddedCharacters
+    return enabledCharacters
 end
 
 -- This method is the addon-specific logic for combining one character, and is used by
@@ -252,13 +263,14 @@ function thisClass:aggregateCharacterAccountFile(
 )
     -- Get all unique accounts
     local otherAccounts = {}
-    for _, character in ipairs(configTable.AddedCharacters) do
-        otherAccounts[character.Account] = true
+    for _, character in ipairs(configTable.characters) do
+        otherAccounts[character.account] = true
     end
     otherAccounts[characterAccount] = nil
 
     -- Read the character account file
-    local wtfAccountDir = configTable.WowWtfFolder .. "\\Account"
+    local pathSeparator = string.sub(package.config, 1, 1)
+    local wtfAccountDir = configTable.wtfPath .. pathSeparator .. "Account"
     local characterAccountFilePath = self:getPath(wtfAccountDir, characterAccount)
     local fh = io.open(characterAccountFilePath, "rb")
     if fh == nil then
