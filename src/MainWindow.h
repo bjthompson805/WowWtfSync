@@ -22,10 +22,15 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget* parent = nullptr);
 
+signals:
+    void signedOut();
+
 protected:
     void closeEvent(QCloseEvent* event) override;
 
 private slots:
+    void onMyAccount();
+    void onSignOut();
     // WTF path bar
     void onBrowse();
     void onApply();
@@ -45,6 +50,7 @@ private slots:
 
 private:
     // ── UI builders ───────────────────────────────────────────────────────
+    void buildAccountMenu();
     void buildWtfBar(class QVBoxLayout* root);
     void buildPushAllBar(QVBoxLayout* root);
     void buildCharacterTable(QVBoxLayout* root);

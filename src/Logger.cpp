@@ -1,11 +1,9 @@
 #include "Logger.h"
 
 #include <QFile>
-#include <QDir>
 #include <QCoreApplication>
 #include <QDateTime>
 #include <QTextStream>
-#include <QStandardPaths>
 
 Logger& Logger::instance() {
     static Logger inst;
@@ -15,14 +13,7 @@ Logger& Logger::instance() {
 Logger::Logger() {}
 
 QString Logger::logFilePath() const {
-    // Use the OS-standard writable app-data directory so this works correctly
-    // inside read-only environments such as AppImage mounts.
-    // Linux:   ~/.local/share/WowWtfSync/WowWtfSync/
-    // macOS:   ~/Library/Application Support/WowWtfSync/
-    // Windows: %APPDATA%\WowWtfSync\WowWtfSync
-    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir().mkpath(dir);   // create the directory if it doesn't exist yet
-    return dir + "/log.txt";
+    return QCoreApplication::applicationDirPath() + "/log.txt";
 }
 
 QString Logger::keywordStr(Keyword kw) const {

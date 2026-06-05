@@ -169,7 +169,7 @@ QString PushDialog::findLuaExecutable() const {
 // ──────────────────────────────────────────────────────────────────────────────
 QStringList PushDialog::buildLuaArgs() const {
     QString pushLua    = QCoreApplication::applicationDirPath() + "/push.lua";
-    QString jsonConfig = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/config.json";
+    QString jsonConfig = QCoreApplication::applicationDirPath() + "/config.json";
 
     QStringList args;
     args << pushLua << m_addon << jsonConfig;

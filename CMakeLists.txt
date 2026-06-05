@@ -8,12 +8,12 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
 # ── Qt version detection ────────────────────────────────────────────────────
-find_package(Qt6 QUIET COMPONENTS Core Widgets)
+find_package(Qt6 QUIET COMPONENTS Core Widgets Network)
 if(Qt6_FOUND)
     set(QT_VERSION_MAJOR 6)
     message(STATUS "Using Qt6")
 else()
-    find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
+    find_package(Qt5 REQUIRED COMPONENTS Core Widgets Network)
     set(QT_VERSION_MAJOR 5)
     message(STATUS "Using Qt5")
 endif()
@@ -26,6 +26,9 @@ set(SOURCES
     src/Logger.cpp
     src/WtfScanner.cpp
     src/PushDialog.cpp
+    src/AuthManager.cpp
+    src/LoginDialog.cpp
+    src/AccountDialog.cpp
     resources/resources.qrc
 )
 
@@ -36,15 +39,18 @@ set(HEADERS
     src/Logger.h
     src/WtfScanner.h
     src/PushDialog.h
+    src/AuthManager.h
+    src/LoginDialog.h
+    src/AccountDialog.h
 )
 
 # ── Executable ───────────────────────────────────────────────────────────────
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_add_executable(WowWtfSync WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS})
-    target_link_libraries(WowWtfSync PRIVATE Qt6::Core Qt6::Widgets)
+    target_link_libraries(WowWtfSync PRIVATE Qt6::Core Qt6::Widgets Qt6::Network)
 else()
     add_executable(WowWtfSync WIN32 MACOSX_BUNDLE ${SOURCES} ${HEADERS})
-    target_link_libraries(WowWtfSync PRIVATE Qt5::Core Qt5::Widgets)
+    target_link_libraries(WowWtfSync PRIVATE Qt5::Core Qt5::Widgets Qt5::Network)
 endif()
 
 target_include_directories(WowWtfSync PRIVATE src)

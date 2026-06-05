@@ -1,10 +1,8 @@
 #include "ConfigManager.h"
 
 #include <QFile>
-#include <QDir>
 #include <QCoreApplication>
 #include <QJsonDocument>
-#include <QStandardPaths>
 
 ConfigManager& ConfigManager::instance() {
     static ConfigManager inst;
@@ -16,14 +14,8 @@ ConfigManager::ConfigManager() {
 }
 
 QString ConfigManager::configFilePath() const {
-    // Use the OS-standard writable app-data directory so this works correctly
-    // inside read-only environments such as AppImage mounts.
-    // Linux:   ~/.local/share/WowWtfSync/WowWtfSync/
-    // macOS:   ~/Library/Application Support/WowWtfSync/
-    // Windows: %APPDATA%\WowWtfSync\WowWtfSync
-    QString dir = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-    QDir().mkpath(dir);   // create the directory if it doesn't exist yet
-    return dir + "/config.json";
+    // Store config.json next to the executable so push.lua can locate it easily.
+    return QCoreApplication::applicationDirPath() + "/config.json";
 }
 
 void ConfigManager::load() {

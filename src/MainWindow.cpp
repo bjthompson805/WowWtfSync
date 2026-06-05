@@ -3,6 +3,8 @@
 #include "Logger.h"
 #include "WtfScanner.h"
 #include "PushDialog.h"
+#include "AuthManager.h"
+#include "AccountDialog.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -28,6 +30,9 @@
 #include <QApplication>
 #include <QStackedWidget>
 #include <QWheelEvent>
+#include <QMenuBar>
+#include <QDesktopServices>
+#include <QUrl>
 
 // QComboBox subclass that ignores scroll-wheel events so table scrolling
 // doesn't accidentally change dropdown values.
@@ -79,6 +84,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
     root->setSpacing(8);
     root->setContentsMargins(10, 10, 10, 10);
 
+    buildAccountMenu();
     buildWtfBar(root);
     buildPushAllBar(root);
     buildCharacterTable(root);
@@ -95,6 +101,7 @@ MainWindow::MainWindow(QWidget* parent) : QMainWindow(parent) {
         populateAccountList();
     }
     loadTableFromConfig();
+    m_table->scrollToTop();
     updateStatusBar();
     setUnsavedChanges(false);
 }
@@ -283,6 +290,44 @@ void MainWindow::buildStatusBar() {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Account menu
+// ─────────────────────────────────────────────────────────────────────────────
+
+void MainWindow::buildAccountMenu() {
+    const QString username = AuthManager::instance().userInfo().username;
+    QMenu* accountMenu = menuBar()->addMenu(QString("Account (%1)").arg(username));
+
+    auto* myAccountAction = accountMenu->addAction("My Account");
+    connect(myAccountAction, &QAction::triggered, this, &MainWindow::onMyAccount);
+
+    accountMenu->addSeparator();
+
+    auto* signOutAction = accountMenu->addAction("Sign Out");
+    connect(signOutAction, &QAction::triggered, this, &MainWindow::onSignOut);
+}
+
+void MainWindow::onMyAccount() {
+    AccountDialog dlg(this);
+    dlg.exec();
+}
+
+void MainWindow::onSignOut() {
+    if (m_hasUnsaved) {
+        auto reply = QMessageBox::question(
+            this, "Unsaved Changes",
+            "You have unsaved changes to the character list.\n"
+            "Are you sure you want to sign out without saving?",
+            QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        if (reply != QMessageBox::Yes) return;
+    }
+
+    hide();
+    AuthManager::instance().logout([this]() {
+        emit signedOut();
+    });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Close event — guard against unsaved changes
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -295,13 +340,18 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     auto reply = QMessageBox::question(
         this, "Unsaved Changes",
         "You have unsaved changes to the character list.\n"
-        "Are you sure you want to exit without saving?",
-        QMessageBox::Yes | QMessageBox::No, QMessageBox::No);
+        "Would you like to save before exiting?",
+        QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel,
+        QMessageBox::Yes);
 
-    if (reply == QMessageBox::Yes)
+    if (reply == QMessageBox::Yes) {
+        saveTableToConfig();
         event->accept();
-    else
+    } else if (reply == QMessageBox::No) {
+        event->accept();
+    } else {
         event->ignore();
+    }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
