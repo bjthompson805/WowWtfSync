@@ -140,9 +140,8 @@ void MainWindow::buildPushAllBar(QVBoxLayout* root) {
     topRow->addWidget(pushAllLabel);
     topRow->addSpacing(8);
 
-    const QIcon upIcon = style()->standardIcon(QStyle::SP_ArrowUp);
     for (const QString& addon : kAddons) {
-        auto* btn = new QPushButton(upIcon, addon);
+        auto* btn = new QPushButton("↑ " + addon);
         connect(btn, &QPushButton::clicked, this, [this, addon]() {
             onPushAllAddon(addon);
         });
@@ -493,9 +492,8 @@ void MainWindow::addTableRow(const CharacterEntry& entry) {
     actLayout->setContentsMargins(2, 2, 2, 2);
     actLayout->setSpacing(2);
 
-    auto* pushBtn = new QPushButton();
+    auto* pushBtn = new QPushButton("↑");
     pushBtn->setFixedSize(26, 26);
-    pushBtn->setIcon(m_table->style()->standardIcon(QStyle::SP_ArrowUp));
     pushBtn->setToolTip("Push addon data for this character");
     connect(pushBtn, &QPushButton::clicked, this, [this, actWidget]() {
         for (int r = 0; r < m_table->rowCount(); ++r) {

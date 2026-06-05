@@ -367,3 +367,11 @@ config.json
 .idea
 build/
 build_check/
+AppDir/
+*.AppImage
+.qt/
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+
