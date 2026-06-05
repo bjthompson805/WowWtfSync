@@ -137,12 +137,23 @@ void PushDialog::buildUi() {
 }
 
 QString PushDialog::findLuaExecutable() const {
-    // Try common Lua 5.4+ binary names in PATH order
     static const QStringList candidates = {
         "lua5.4", "lua54", "lua5.3", "lua53", "lua"
     };
+
+    // When running as a .app bundle on macOS the system PATH excludes Homebrew,
+    // so probe its prefix directories explicitly before falling back to PATH.
+    QStringList extraPaths;
+#ifdef Q_OS_MAC
+    extraPaths << "/opt/homebrew/bin"  // Apple Silicon
+               << "/usr/local/bin";    // Intel
+#endif
+
     for (const QString& name : candidates) {
-        // QProcess::execute with --version returns 0 on success for most lua builds
+        if (!extraPaths.isEmpty()) {
+            QString prog = QStandardPaths::findExecutable(name, extraPaths);
+            if (!prog.isEmpty()) return prog;
+        }
         QString prog = QStandardPaths::findExecutable(name);
         if (!prog.isEmpty()) return prog;
     }
