@@ -4,6 +4,10 @@ require "DataCombine.DataCombine"
 -- Inherit from DataCombine.DataCombine
 local thisClass = DataCombine.DataCombine:extend("DataCombine.DataCombineAuctionator")
 
+local util = require("Util")
+local cbor = require("LibCBOR")
+local pathSeparator = string.sub(package.config, 1, 1)
+
 function thisClass:init() end -- Constructor
 
 -- This method will copy any item scan days that exist in the source file but not in the
@@ -29,10 +33,15 @@ function thisClass:combineOne(
         return oldDestStr
     end
 
-    -- Evaluate the source file
-    local sourceAuctionatorFn = assert(load(sourceStr))
-    sourceAuctionatorFn()
-    local sourceAuctionatorPriceDatabase = AUCTIONATOR_PRICE_DATABASE
+    -- Evaluate the source file (cache result to avoid redundant load() calls
+    -- when multiple characters share the same source account in combineAll).
+    if self._cachedSourceStr ~= sourceStr then
+        local sourceAuctionatorFn = assert(load(sourceStr))
+        sourceAuctionatorFn()
+        self._cachedSourceTable = AUCTIONATOR_PRICE_DATABASE
+        self._cachedSourceStr = sourceStr
+    end
+    local sourceAuctionatorPriceDatabase = self._cachedSourceTable
 
     -- Evaluate the destination file
     destAuctionatorFn = assert(load(oldDestStr))
@@ -53,13 +62,12 @@ function thisClass:combineOne(
     end
 
     local priceDbKey = realm .. " " .. faction
-    local cbor = require "LibCBOR"
     if (type(destAuctionatorPriceDatabase[priceDbKey]) == "string") then
         -- Needs to be deserialized
         destAuctionatorPriceDatabase[priceDbKey] = cbor:Deserialize(destAuctionatorPriceDatabase[priceDbKey])
     end
     if (type(sourceAuctionatorPriceDatabase[priceDbKey]) == "string") then
-        -- Needs to be deserialized
+        -- Needs to be deserialized (result is stored back into the cached table, so this only runs once)
         sourceAuctionatorPriceDatabase[priceDbKey] = cbor:Deserialize(sourceAuctionatorPriceDatabase[priceDbKey])
     end
 
@@ -114,7 +122,7 @@ function thisClass:combineOne(
                     end
                 end
             end
-            
+
             -- If the source data is more recent, then update the "m" (last seen minimum price).
             if (sourceMostRecentDay > destMostRecentDay) then
                 destItemDataDeserialized["m"] = sourceItemDataDeserialized["m"]
@@ -133,12 +141,21 @@ function thisClass:combineOne(
     end
 
     -- Return the new destination string
-    local util = require("Util")
-    local newDestStr = "AUCTIONATOR_PRICE_DATABASE = " ..
-        util:printTable(destAuctionatorPriceDatabase) .. "\n"
+    local start = os.clock()
+    local newDestStrTable = {
+        "AUCTIONATOR_PRICE_DATABASE = ",
+        util:printTable(destAuctionatorPriceDatabase),
+        "\n"
+    }
     for varName, varValue in pairs(destAuctionatorExtraVariables) do
-        newDestStr = newDestStr .. varName .. " = " .. util:printTable(varValue) .. "\n"
+        table.insert(newDestStrTable, varName)
+        table.insert(newDestStrTable, " = ")
+        table.insert(newDestStrTable, util:printTable(varValue))
+        table.insert(newDestStrTable, "\n")
     end
+    local totalTime = string.format("%.2f", os.clock() - start)
+    print("Total time: " .. totalTime)
+    local newDestStr = table.concat(newDestStrTable)
     self.alreadyCombined[alreadyCombinedKey] = true
     return newDestStr
 end
@@ -155,7 +172,6 @@ function thisClass:getMostRecentDay(itemData)
 end
 
 function thisClass:getPath(wtfAccountDir, account)
-    local pathSeparator = string.sub(package.config, 1, 1)
     return table.concat(
         {
             wtfAccountDir,

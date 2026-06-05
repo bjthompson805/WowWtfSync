@@ -4,6 +4,10 @@ require "DataCombine.DataCombine"
 -- Inherit from DataCombine.DataCombine
 local thisClass = DataCombine.DataCombine:extend("DataCombine.DataCombineAltoholic")
 
+local util = require("Util")
+local pathSeparator = string.sub(package.config, 1, 1)
+local secondsInOneHour = 60 * 60
+
 -- Constructor
 function thisClass:init(altoholicAddon)
     if (altoholicAddon == nil) then
@@ -25,10 +29,15 @@ function thisClass:combineOne(
 )
     local variableName = self.altoholicAddon .. "DB"
 
-    -- Evaluate the source file
-    local sourceFn = assert(load(sourceStr))
-    sourceFn()
-    local sourceVariable = _G[variableName]
+    -- Evaluate the source file (cache result to avoid redundant load() calls
+    -- when multiple characters share the same source account in combineAll).
+    if self._cachedSourceStr ~= sourceStr then
+        local sourceFn = assert(load(sourceStr))
+        sourceFn()
+        self._cachedSourceTable = _G[variableName]
+        self._cachedSourceStr = sourceStr
+    end
+    local sourceVariable = self._cachedSourceTable
 
     -- Evaluate the destination file
     destFn = assert(load(oldDestStr))
@@ -49,7 +58,7 @@ function thisClass:combineOne(
         destVariable["profileKeys"] = {}
     end
     destVariable["profileKeys"][profileKey] = sourceVariable["profileKeys"][profileKey]
-    
+
     -- Combine the character data
     if (self.altoholicAddon ~= "Altoholic") then -- Altoholic.lua only has profileKeys
         if (sourceVariable["global"] == nil or
@@ -72,13 +81,11 @@ function thisClass:combineOne(
     end
 
     -- Return the new destination string
-    local util = require("Util")
     local newDestStr = variableName .. " = " .. util:printTable(destVariable)
     return newDestStr
 end
 
 function thisClass:getPath(wtfAccountDir, account)
-    local pathSeparator = string.sub(package.config, 1, 1)
     return table.concat(
         {
             wtfAccountDir,
@@ -140,7 +147,7 @@ function thisClass:aggregateOne(
     otherAccountFileFn = assert(load(otherAccountFileStr))
     otherAccountFileFn()
     local otherAccountVariable = DataStore_MailsDB
-    
+
     local key = "Default." .. characterRealm .. "." .. characterName
     if (characterAccountVariable["global"] == nil or
         characterAccountVariable["global"]["Characters"] == nil or
@@ -150,7 +157,7 @@ function thisClass:aggregateOne(
         -- has never seen mail, so this is normal behavior and there's nothing to do.
         return characterAccountFileStr
     end
-    
+
     if (otherAccountVariable["global"] == nil or
         otherAccountVariable["global"]["Characters"] == nil or
         otherAccountVariable["global"]["Characters"][key] == nil or
@@ -179,11 +186,10 @@ function thisClass:aggregateOne(
                 goto nextSourceMail
             end
         end
-                
+
         -- Handle the case where a mail should not be copied from the other account
         -- into the character account due to the character's lastUpdate being
         -- greater than the other account's mail's "lastCheck" (+1 hour for transit time).
-        local secondsInOneHour = 60 * 60
         if (otherAccountMail["lastCheck"] + secondsInOneHour > characterLastUpdate) then
             -- Copy to destination
             table.insert(characterAccountMails, otherAccountMail)
@@ -195,7 +201,6 @@ function thisClass:aggregateOne(
     characterAccountVariable["global"]["Characters"][key]["Mails"] = characterAccountMails
 
     -- Return the new character account file string
-    local util = require("Util")
     local newCharacterAccountFileStr = "DataStore_MailsDB = " .. util:printTable(characterAccountVariable)
     return newCharacterAccountFileStr
 end

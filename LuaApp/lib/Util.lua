@@ -3,6 +3,14 @@
 
 local class = require "30log"
 
+-- Attempt to load the C extension for printTable. If the extension is present
+-- (built via CMake and placed in LuaApp/lua_modules/), it is used automatically;
+-- otherwise the pure-Lua implementation below serves as the fallback.
+local _printTableC_ok, _printTableC = pcall(require, "printTableC")
+if not _printTableC_ok then
+    print("printTableC load failed: " .. tostring(_printTableC))
+end
+
 local thisClass = class("Util")
 
 function thisClass:getJsonConfigTable(jsonConfigPath)
@@ -33,56 +41,66 @@ Taken from https://gist.github.com/marcotrosi/163b9e890e012c6a460a and modified.
 -- t = table
 -- f = filename [optional] (if omitted, a string is returned)
 function thisClass:printTable(t, f)
-    local function printTableHelper(obj, cnt)
-        local cnt = cnt or 0
-        local tableStr = {}
-        
-        if type(obj) == "table" then
-        
-            table.insert(tableStr, "\n" .. string.rep("\t", cnt) .. "{\n")
-            cnt = cnt + 1
-            
-            for k,v in pairs(obj) do
-                if type(k) == "string" then
-                    table.insert(tableStr, string.rep("\t",cnt) .. '["' .. k .. '"]' .. ' = ')
-                end
-                
-                if type(k) == "number" then
-                    table.insert(tableStr, string.rep("\t",cnt) .. "[" .. k .. "]" .. " = ")
-                end
-                
-                table.insert(tableStr, printTableHelper(v, cnt))
-                table.insert(tableStr, ",\n")
-            end
-            
-            cnt = cnt-1
-            table.insert(tableStr, string.rep("\t", cnt) .. "}")
-        
-        elseif type(obj) == "string" then
-            obj = string.gsub(obj, "\\", "\\\\")
-            obj = string.gsub(obj, "\000", "\\000")
-            obj = string.gsub(obj, "\n", "\\n")
-            obj = string.gsub(obj, "\r", "\\r")
-            obj = string.gsub(obj, '"', '\\"')
-            table.insert(tableStr, string.format('"%s"', obj))
-        else
-            table.insert(tableStr, tostring(obj))
-        end
-        
-        return table.concat(tableStr)
-    end
-    
-    if f == nil then
-        return printTableHelper(t)
+    local serialized
+    if _printTableC_ok then
+        -- Fast path: C extension (single heap buffer, no Lua-VM overhead).
+        serialized = _printTableC.printTable(t)
     else
-        local tableStr = printTableHelper(t)
+        print("46")
+        -- Fallback: pure-Lua implementation.
+        local function printTableHelper(obj, cnt, out)
+            cnt = cnt or 0
+            out = out or {}
+
+            if type(obj) == "table" then
+
+                local indent = string.rep("\t", cnt)
+                table.insert(out, "\n" .. indent .. "{\n")
+                cnt = cnt + 1
+
+                for k,v in pairs(obj) do
+                    if type(k) == "string" then
+                        table.insert(out, indent .. '["' .. k .. '"]' .. ' = ')
+                    elseif type(k) == "number" then
+                        table.insert(out, indent .. "[" .. k .. "] = ")
+                    end
+
+                    printTableHelper(v, cnt, out)
+                    table.insert(out, ",\n")
+                end
+
+                cnt = cnt - 1
+                table.insert(out, indent .. "}")
+
+            elseif type(obj) == "string" then
+                if obj:find('[\\%z\n\r"]') then
+                    obj = string.gsub(obj, "\\", "\\\\")
+                    obj = string.gsub(obj, "\000", "\\000")
+                    obj = string.gsub(obj, "\n", "\\n")
+                    obj = string.gsub(obj, "\r", "\\r")
+                    obj = string.gsub(obj, '"', '\\"')
+                end
+                table.insert(out, '"' .. obj .. '"')
+            else
+                table.insert(out, tostring(obj))
+            end
+
+            return out
+        end
+
+        serialized = table.concat(printTableHelper(t))
+    end
+
+    if f == nil then
+        return serialized
+    else
         local fh = io.open(f, "w")
         if fh == nil then
             self.errorMsg = "Could not open file '" .. destPath .. "'"
             return false
         end
         fh:write("return ")
-        fh:write(tableStr)
+        fh:write(serialized)
         fh:close()
 
         return true

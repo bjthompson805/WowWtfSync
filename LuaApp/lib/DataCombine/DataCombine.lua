@@ -9,6 +9,8 @@ local class = require "30log"
 
 local thisClass = class("DataCombine.DataCombine")
 
+local pathSeparator = string.sub(package.config, 1, 1)
+
 function thisClass:init() end -- Constructor
 
 -- This method combines the given character into all other accounts listed in the jsonConfigPath.
@@ -56,7 +58,6 @@ function thisClass:combine(characterName, realm, sourceAccount, jsonConfigPath)
     end
 
     -- Read the source file
-    local pathSeparator = string.sub(package.config, 1, 1)
     local wtfAccountDir = configTable.wtfPath .. pathSeparator .. "Account"
     local sourcePath = self:getPath(wtfAccountDir, sourceAccount)
     local fh = io.open(sourcePath, "rb")
@@ -147,7 +148,6 @@ function thisClass:combineAll(jsonConfigPath)
         end
     end
 
-    local pathSeparator = string.sub(package.config, 1, 1)
     local wtfAccountDir = configTable.wtfPath .. pathSeparator .. "Account"
     local accountToNewDestStr = {}
     for account in pairs(uniqueAccounts) do
@@ -269,7 +269,6 @@ function thisClass:aggregateCharacterAccountFile(
     otherAccounts[characterAccount] = nil
 
     -- Read the character account file
-    local pathSeparator = string.sub(package.config, 1, 1)
     local wtfAccountDir = configTable.wtfPath .. pathSeparator .. "Account"
     local characterAccountFilePath = self:getPath(wtfAccountDir, characterAccount)
     local fh = io.open(characterAccountFilePath, "rb")

@@ -4,13 +4,21 @@ require "DataCombine.DataCombine"
 -- Inherit from DataCombine.DataCombine
 local thisClass = DataCombine.DataCombine:extend("DataCombine.DataCombineBagnon")
 
+local util = require("Util")
+local pathSeparator = string.sub(package.config, 1, 1)
+
 function thisClass:init() end -- Constructor
 
 function thisClass:combineOne(characterName, realm, sourceAccount, faction, sourceStr, oldDestStr)
-    -- Evaluate the source BagBrother file
-    local sourceBagBrotherFn = assert(load(sourceStr))
-    sourceBagBrotherFn()
-    local sourceBrotherBags = BrotherBags
+    -- Evaluate the source BagBrother file (cache result to avoid redundant load() calls
+    -- when multiple characters share the same source account in combineAll).
+    if self._cachedSourceStr ~= sourceStr then
+        local sourceBagBrotherFn = assert(load(sourceStr))
+        sourceBagBrotherFn()
+        self._cachedSourceTable = BrotherBags
+        self._cachedSourceStr = sourceStr
+    end
+    local sourceBrotherBags = self._cachedSourceTable
 
     -- Evaluate the destination BagBrother file
     destBagBrotherFn = assert(load(oldDestStr))
@@ -29,13 +37,11 @@ function thisClass:combineOne(characterName, realm, sourceAccount, faction, sour
     destBrotherBags[realm][characterName] = sourceBrotherBags[realm][characterName]
 
     -- Return the new destination string
-    local util = require("Util")
     local newDestStr = "BrotherBags = " .. util:printTable(destBrotherBags)
     return newDestStr
 end
 
 function thisClass:getPath(wtfAccountDir, account)
-    local pathSeparator = string.sub(package.config, 1, 1)
     return table.concat(
         {
             wtfAccountDir,

@@ -4,13 +4,21 @@ require "DataCombine.DataCombine"
 -- Inherit from DataCombine.DataCombine
 local thisClass = DataCombine.DataCombine:extend("DataCombine.DataCombineNovaWorldBuffs")
 
+local util = require("Util")
+local pathSeparator = string.sub(package.config, 1, 1)
+
 function thisClass:init() end -- Constructor
 
 function thisClass:combineOne(characterName, realm, sourceAccount, faction, sourceStr, oldDestStr)
-    -- Evaluate the source file
-    local sourceNovaWorldBuffsFn = assert(load(sourceStr))
-    sourceNovaWorldBuffsFn()
-    local sourceNWBdatabase = NWBdatabase
+    -- Evaluate the source file (cache result to avoid redundant load() calls
+    -- when multiple characters share the same source account in combineAll).
+    if self._cachedSourceStr ~= sourceStr then
+        local sourceNovaWorldBuffsFn = assert(load(sourceStr))
+        sourceNovaWorldBuffsFn()
+        self._cachedSourceTable = NWBdatabase
+        self._cachedSourceStr = sourceStr
+    end
+    local sourceNWBdatabase = self._cachedSourceTable
 
     -- Evaluate the destination file
     destNovaWorldBuffsFn = assert(load(oldDestStr))
@@ -44,13 +52,11 @@ function thisClass:combineOne(characterName, realm, sourceAccount, faction, sour
         sourceNWBdatabase["global"][realm][faction]["myChars"][characterName]
 
     -- Return the new destination string
-    local util = require("Util")
     local newDestStr = "NWBdatabase = " .. util:printTable(destNWBdatabase)
     return newDestStr
 end
 
 function thisClass:getPath(wtfAccountDir, account)
-    local pathSeparator = string.sub(package.config, 1, 1)
     return table.concat(
         {
             wtfAccountDir,

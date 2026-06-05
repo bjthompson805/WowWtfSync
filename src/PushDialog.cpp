@@ -209,6 +209,11 @@ void PushDialog::onPushClicked() {
             QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished),
             this, [this](int code, QProcess::ExitStatus) { onProcessFinished(code); });
 
+    // Set the working directory to the executable's directory so that relative
+    // paths in push.lua (package.path, package.cpath) resolve against the same
+    // directory that contains push.lua, LuaApp/, and printTableC.so.
+    m_process->setWorkingDirectory(QCoreApplication::applicationDirPath());
+
     // args[0] = path to push.lua; remaining args are script arguments
     QString script = args.takeFirst();
     m_process->start(lua, QStringList() << script << args);

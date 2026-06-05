@@ -1,11 +1,23 @@
 
--- Set path of 3rd party packages (lua_modules) and our modules (lib).
+local start = os.clock()
+
+-- Derive the directory containing push.lua from arg[0] so that all module
+-- paths are resolved relative to the script itself, not the working directory.
+-- arg[0] is the absolute path passed by PushDialog: /path/to/build/push.lua
 local pathSeparator = string.sub(package.config, 1, 1)
-local modulePaths = {
-    table.concat({".", "LuaApp", "lua_modules", "?.lua"}, pathSeparator),
-    table.concat({".", "LuaApp", "lib", "?.lua"}, pathSeparator)
-}
-package.path = package.path .. ";" .. table.concat(modulePaths, ";")
+local scriptDir = (arg[0] or ""):match("^(.*[/\\])") or ("." .. pathSeparator)
+
+-- Set path of 3rd party packages (lua_modules) and our modules (lib).
+package.path = package.path
+    .. ";" .. scriptDir .. "LuaApp" .. pathSeparator .. "lua_modules" .. pathSeparator .. "?.lua"
+    .. ";" .. scriptDir .. "LuaApp" .. pathSeparator .. "lib"         .. pathSeparator .. "?.lua"
+
+-- Add C module search path for printTableC and any future C extensions.
+-- Both .so (Linux/macOS) and .dll (Windows) are listed so the correct one
+-- is found automatically regardless of platform.
+package.cpath = package.cpath
+    .. ";" .. scriptDir .. "LuaApp" .. pathSeparator .. "lua_modules" .. pathSeparator .. "?.so"
+    .. ";" .. scriptDir .. "LuaApp" .. pathSeparator .. "lua_modules" .. pathSeparator .. "?.dll"
 
 require "requireNested" -- Allow for instantiation of modules in nested directories
 require "DataCombine.DataCombineFactory"
@@ -80,19 +92,21 @@ for _, dataCombineObj in ipairs(dataCombineObjs) do
 end
 
 -- Print the success message
+local totalTime = string.format("%.2f", os.clock() - start)
 if (character == "all") then
     print(
         "'" .. addonName .. "' data has been successfully combined for " ..
-        "all enabled characters by pushing from the character to all *other* accounts."
+        "all enabled characters by pushing from the character to all *other* accounts (took " .. totalTime .. " seconds)."
     )
 else
     local characterName, realm, account = splitCharacter(character)
     print(string.format(
         "'%s' data for character '%s' on realm '%s' for account '%s' has been successfully " ..
-        "combined to all other accounts.",
+        "combined to all other accounts (took %s seconds).",
         addonName,
         characterName,
         realm,
-        account
+        account,
+        totalTime
     ))
 end

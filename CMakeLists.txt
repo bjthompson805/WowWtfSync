@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(WowWtfSync VERSION 1.0.0 LANGUAGES CXX)
+project(WowWtfSync VERSION 1.0.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -54,6 +54,51 @@ else()
 endif()
 
 target_include_directories(WowWtfSync PRIVATE src)
+
+# ── printTableC Lua C extension ─────────────────────────────────────────────
+# Builds a native Lua module that replaces the pure-Lua printTable() serializer.
+# Util.lua loads it with pcall(require, "printTableC") and falls back gracefully
+# if the extension is not present.
+
+find_package(Lua)
+if(LUA_FOUND)
+    message(STATUS "Lua headers: ${LUA_INCLUDE_DIR} (v${LUA_VERSION_STRING})")
+
+    add_library(printTableC MODULE LuaApp/lua_src/printTableC.c)
+    target_include_directories(printTableC PRIVATE ${LUA_INCLUDE_DIR})
+
+    # No "lib" prefix — Lua's require expects "printTableC.so", not "libprintTableC.so"
+    set_target_properties(printTableC PROPERTIES PREFIX "" OUTPUT_NAME "printTableC")
+
+    if(APPLE)
+        # macOS: do NOT link against Lua; the running interpreter provides its symbols.
+        target_link_options(printTableC PRIVATE -undefined dynamic_lookup)
+        set_target_properties(printTableC PROPERTIES SUFFIX ".so")
+    elseif(WIN32)
+        # Windows: link the Lua import library so the DLL resolves symbols at load time.
+        target_link_libraries(printTableC PRIVATE ${LUA_LIBRARIES})
+        set_target_properties(printTableC PROPERTIES SUFFIX ".dll")
+    else()
+        # Linux: the interpreter provides symbols at runtime; no explicit link needed.
+        set_target_properties(printTableC PROPERTIES SUFFIX ".so")
+    endif()
+
+    # After building, copy the module into the lua_modules directory where push.lua
+    # can find it via package.cpath.
+    add_custom_command(TARGET printTableC POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory
+            "${CMAKE_CURRENT_BINARY_DIR}/LuaApp/lua_modules"
+        COMMAND ${CMAKE_COMMAND} -E copy
+            "$<TARGET_FILE:printTableC>"
+            "${CMAKE_CURRENT_BINARY_DIR}/LuaApp/lua_modules/"
+        COMMENT "Deploying printTableC to LuaApp/lua_modules/"
+    )
+else()
+    message(WARNING
+        "Lua development headers not found — printTableC will not be built. "
+        "Install lua-dev (or equivalent) and re-run cmake to enable it. "
+        "Util.lua will fall back to the pure-Lua serializer automatically.")
+endif()
 
 # ── Lua assets (push.lua + LuaApp) ──────────────────────────────────────────
 # These files are copied into the build directory so the executable can find
