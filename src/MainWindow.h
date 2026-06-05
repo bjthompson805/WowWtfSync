@@ -5,6 +5,7 @@
 #include <QCloseEvent>
 #include <QStringList>
 #include <QMap>
+#include <QJsonArray>
 
 class QLineEdit;
 class QListWidget;
@@ -66,12 +67,17 @@ private:
     void updateAllAccountCombos();
     void updateStatusBar();
 
+    // ── Dirty-state helpers ───────────────────────────────────────────────
+    QJsonArray currentTableState() const;
+    void checkForChanges();
+
     // ── Data ──────────────────────────────────────────────────────────────
     QString                    m_wtfPath;
     QStringList                m_accounts;
     QMap<QString, QStringList> m_accountChars;  // account -> ["CharName-Realm", …]
     bool                       m_hasUnsaved  = false;
     bool                       m_resizing    = false;
+    QJsonArray                 m_savedState;
 
     // ── Widgets ───────────────────────────────────────────────────────────
     QLineEdit*   m_wtfEdit       = nullptr;

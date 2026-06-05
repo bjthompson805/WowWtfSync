@@ -365,3 +365,5 @@ FodyWeavers.xsd
 # WowWtfSync
 config.json
 .idea
+build/
+build_check/

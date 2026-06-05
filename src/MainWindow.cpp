@@ -27,6 +27,17 @@
 #include <QScrollBar>
 #include <QApplication>
 #include <QStackedWidget>
+#include <QWheelEvent>
+
+// QComboBox subclass that ignores scroll-wheel events so table scrolling
+// doesn't accidentally change dropdown values.
+class NoScrollComboBox : public QComboBox {
+public:
+    using QComboBox::QComboBox;
+protected:
+    void wheelEvent(QWheelEvent* e) override { e->ignore(); }
+};
+
 
 // ─── Column indices ───────────────────────────────────────────────────────────
 enum Col {
@@ -376,8 +387,21 @@ void MainWindow::onAddCharacter() {
         entry.realmName     = {};
     }
 
+    // Reject duplicates (same character display name + account)
+    for (int r = 0; r < m_table->rowCount(); ++r) {
+        auto* ci = m_table->item(r, COL_CHARACTER);
+        auto* ac = qobject_cast<QComboBox*>(m_table->cellWidget(r, COL_ACCOUNT));
+        if (ci && ci->text() == entry.displayName() &&
+            ac && ac->currentText() == account) {
+            QMessageBox::information(this, "Already Added",
+                QString("%1 (%2) has already been added.")
+                    .arg(entry.displayName(), account));
+            return;
+        }
+    }
+
     addTableRow(entry);
-    setUnsavedChanges(true);
+    checkForChanges();
 
     Logger::instance().log(Logger::CHARACTER,
         "Added character: " + entry.displayName() + " (account: " + account + ")");
@@ -389,7 +413,14 @@ void MainWindow::onAddCharacter() {
 
 void MainWindow::onSaveClicked() {
     saveTableToConfig();
+    // Block selection-list signals while disabling the Save button so that
+    // Qt's focus-shift doesn't accidentally fire onAccountSelected and
+    // populate the character list as a side-effect.
+    m_accountList->blockSignals(true);
+    m_charList->blockSignals(true);
     setUnsavedChanges(false);
+    m_accountList->blockSignals(false);
+    m_charList->blockSignals(false);
     Logger::instance().log(Logger::ACTION, "Character table saved.");
 }
 
@@ -403,7 +434,7 @@ void MainWindow::onRemoveAllClicked() {
 
     if (reply == QMessageBox::Yes) {
         m_table->setRowCount(0);
-        setUnsavedChanges(true);
+        checkForChanges();
         updateTableVisibility();
         Logger::instance().log(Logger::ACTION, "All characters removed.");
     }
@@ -518,12 +549,12 @@ void MainWindow::addTableRow(const CharacterEntry& entry) {
     m_table->setItem(row, COL_CHARACTER, charItem);
 
     // COL_ACCOUNT — combobox
-    auto* accCombo = new QComboBox();
+    auto* accCombo = new NoScrollComboBox();
     accCombo->addItems(m_accounts);
     int idx = accCombo->findText(entry.account);
     if (idx >= 0) accCombo->setCurrentIndex(idx);
     connect(accCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, [this](int) { setUnsavedChanges(true); });
+            this, [this](int) { checkForChanges(); });
     m_table->setCellWidget(row, COL_ACCOUNT, accCombo);
     // Also keep a hidden item for sorting
     auto* accItem = new QTableWidgetItem(entry.account);
@@ -532,12 +563,12 @@ void MainWindow::addTableRow(const CharacterEntry& entry) {
     m_table->setCellWidget(row, COL_ACCOUNT, accCombo);
 
     // COL_FACTION — combobox
-    auto* facCombo = new QComboBox();
+    auto* facCombo = new NoScrollComboBox();
     facCombo->addItems({"Alliance", "Horde"});
     idx = facCombo->findText(entry.faction);
     if (idx >= 0) facCombo->setCurrentIndex(idx);
     connect(facCombo, QOverload<int>::of(&QComboBox::currentIndexChanged),
-            this, [this](int) { setUnsavedChanges(true); });
+            this, [this](int) { checkForChanges(); });
     m_table->setCellWidget(row, COL_FACTION, facCombo);
     auto* facItem = new QTableWidgetItem(entry.faction);
     facItem->setFlags(Qt::NoItemFlags);
@@ -547,7 +578,7 @@ void MainWindow::addTableRow(const CharacterEntry& entry) {
     // COL_ENABLED — centred checkbox
     auto* checkbox = new QCheckBox();
     checkbox->setChecked(entry.enabled);
-    connect(checkbox, &QCheckBox::toggled, this, [this](bool) { setUnsavedChanges(true); });
+    connect(checkbox, &QCheckBox::toggled, this, [this](bool) { checkForChanges(); });
     m_table->setCellWidget(row, COL_ENABLED, centeredWidget(checkbox));
     auto* enabledItem = new QTableWidgetItem();
     enabledItem->setFlags(Qt::NoItemFlags);
@@ -555,6 +586,7 @@ void MainWindow::addTableRow(const CharacterEntry& entry) {
 
     m_table->setSortingEnabled(wasSort);
     updateTableVisibility();
+    m_table->scrollToItem(m_table->item(row, COL_CHARACTER));
 }
 
 void MainWindow::removeTableRow(int row) {
@@ -563,7 +595,7 @@ void MainWindow::removeTableRow(int row) {
         display = ci->text();
 
     m_table->removeRow(row);
-    setUnsavedChanges(true);
+    checkForChanges();
     updateTableVisibility();
 
     Logger::instance().log(Logger::CHARACTER,
@@ -631,6 +663,47 @@ void MainWindow::loadTableFromConfig() {
 }
 
 void MainWindow::setUnsavedChanges(bool dirty) {
+    m_hasUnsaved = dirty;
+    m_saveBtn->setEnabled(dirty);
+    // Capture the current table as the new clean baseline whenever we mark it saved.
+    if (!dirty)
+        m_savedState = currentTableState();
+}
+
+QJsonArray MainWindow::currentTableState() const {
+    QJsonArray arr;
+    for (int r = 0; r < m_table->rowCount(); ++r) {
+        CharacterEntry e = readRowEntry(r);
+        QJsonObject obj;
+        obj["characterName"] = e.characterName;
+        obj["realmName"]     = e.realmName;
+        obj["account"]       = e.account;
+        obj["faction"]       = e.faction;
+        obj["enabled"]       = e.enabled;
+        arr.append(obj);
+    }
+    return arr;
+}
+
+void MainWindow::checkForChanges() {
+    // Serialize each entry as a pipe-delimited string, then sort both lists
+    // so that table column-sort reordering doesn't falsely dirty the state.
+    auto toSortedList = [](const QJsonArray& arr) {
+        QStringList list;
+        for (const auto& v : arr) {
+            QJsonObject o = v.toObject();
+            list << QString("%1|%2|%3|%4|%5")
+                        .arg(o["characterName"].toString(),
+                             o["realmName"].toString(),
+                             o["account"].toString(),
+                             o["faction"].toString(),
+                             o["enabled"].toBool() ? "1" : "0");
+        }
+        list.sort();
+        return list;
+    };
+
+    bool dirty = (toSortedList(currentTableState()) != toSortedList(m_savedState));
     m_hasUnsaved = dirty;
     m_saveBtn->setEnabled(dirty);
 }
