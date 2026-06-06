@@ -1,0 +1,4 @@
+// Windows resource file — embeds the application icon into the executable.
+// The linker picks up IDI_ICON1 as the default icon shown in Explorer,
+// the taskbar, and Alt-Tab.
+IDI_ICON1 ICON "app-icon.ico"

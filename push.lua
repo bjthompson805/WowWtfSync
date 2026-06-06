@@ -46,7 +46,7 @@ if (#arg ~= 3) then
 end
 
 -- Create the object for the given addon
-local addonName = arg[1]
+local addonName = arg[1]:sub(1,1):upper() .. arg[1]:sub(2)
 local jsonConfigPath = arg[2]
 local character = arg[3]
 local dataCombineObjs = DataCombine.DataCombineFactory:create(addonName)

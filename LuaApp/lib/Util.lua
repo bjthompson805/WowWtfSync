@@ -8,7 +8,7 @@ local class = require "30log"
 -- otherwise the pure-Lua implementation below serves as the fallback.
 local _printTableC_ok, _printTableC = pcall(require, "printTableC")
 if not _printTableC_ok then
-    print("printTableC load failed: " .. tostring(_printTableC))
+    print("printTableC load failed, so the standard, slower method will be used: " .. tostring(_printTableC))
 end
 
 local thisClass = class("Util")
@@ -46,7 +46,6 @@ function thisClass:printTable(t, f)
         -- Fast path: C extension (single heap buffer, no Lua-VM overhead).
         serialized = _printTableC.printTable(t)
     else
-        print("46")
         -- Fallback: pure-Lua implementation.
         local function printTableHelper(obj, cnt, out)
             cnt = cnt or 0

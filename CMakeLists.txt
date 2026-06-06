@@ -28,6 +28,43 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(imgui)
 
+# nlohmann/json  (MIT, header-only)
+FetchContent_Declare(
+    nlohmann_json
+    GIT_REPOSITORY https://github.com/nlohmann/json.git
+    GIT_TAG        v3.11.3
+    GIT_SHALLOW    TRUE
+)
+set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
+set(JSON_Install    OFF CACHE BOOL "" FORCE)
+FetchContent_MakeAvailable(nlohmann_json)
+
+# stb_image  (public domain, single header — fetched directly, no clone needed)
+set(STB_IMAGE_H "${CMAKE_BINARY_DIR}/stb_image.h")
+if(NOT EXISTS "${STB_IMAGE_H}")
+    file(DOWNLOAD
+        "https://raw.githubusercontent.com/nothings/stb/master/stb_image.h"
+        "${STB_IMAGE_H}"
+        STATUS stb_status
+    )
+    list(GET stb_status 0 stb_err)
+    if(stb_err)
+        message(FATAL_ERROR "Failed to download stb_image.h: ${stb_status}")
+    endif()
+endif()
+
+# ─── Embed app icon PNG as a C byte array ─────────────────────────────────────
+set(ICON_PNG "${CMAKE_SOURCE_DIR}/resources/app-icon.png")
+file(READ "${ICON_PNG}" ICON_HEX HEX)
+string(LENGTH "${ICON_HEX}" ICON_HEX_LEN)
+math(EXPR ICON_BYTE_COUNT "${ICON_HEX_LEN} / 2")
+string(REGEX REPLACE "([0-9a-fA-F][0-9a-fA-F])" "0x\\1," ICON_BYTES "${ICON_HEX}")
+file(WRITE "${CMAKE_BINARY_DIR}/AppIconData.h"
+    "#pragma once\n"
+    "static const unsigned char  kAppIconPng[]  = { ${ICON_BYTES} };\n"
+    "static const unsigned int   kAppIconPngSize = ${ICON_BYTE_COUNT};\n"
+)
+
 # ─── ImGui static library (core + SDL3 backends) ──────────────────────────────
 add_library(imgui_lib STATIC
     ${imgui_SOURCE_DIR}/imgui.cpp
@@ -47,12 +84,57 @@ target_link_libraries(imgui_lib PUBLIC SDL3::SDL3-static)
 # ─── Application ──────────────────────────────────────────────────────────────
 add_executable(WowWtfSync
     src/main.cpp
+    src/App.cpp
+    src/Config.cpp
+    src/Logger.cpp
+    src/PushDialog.cpp
+    src/stb_impl.cpp
 )
-target_link_libraries(WowWtfSync PRIVATE imgui_lib SDL3::SDL3-static)
+target_include_directories(WowWtfSync PRIVATE
+    src
+    ${CMAKE_BINARY_DIR}   # AppIconData.h + stb_image.h
+)
+target_link_libraries(WowWtfSync PRIVATE
+    imgui_lib
+    SDL3::SDL3-static
+    nlohmann_json::nlohmann_json
+)
 
-# On Windows, hide the console window for the release build
+# Windows: embed the .ico into the executable and hide the console window.
 if(WIN32)
+    target_sources(WowWtfSync PRIVATE resources/app-icon.rc)
     set_target_properties(WowWtfSync PROPERTIES WIN32_EXECUTABLE TRUE)
+endif()
+
+# ─── Lua C extension: printTableC ────────────────────────────────────────────
+find_package(Lua 5.4)
+if(LUA_FOUND)
+    add_library(printTableC MODULE
+        LuaApp/lua_src/printTableC.c
+    )
+    target_include_directories(printTableC PRIVATE ${LUA_INCLUDE_DIR})
+    set_target_properties(printTableC PROPERTIES
+        PREFIX ""
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/LuaApp/lua_modules"
+    )
+    if(APPLE)
+        set_target_properties(printTableC PROPERTIES
+            SUFFIX     ".so"
+            LINK_FLAGS "-undefined dynamic_lookup"
+        )
+    elseif(WIN32)
+        target_link_libraries(printTableC PRIVATE ${LUA_LIBRARIES})
+    endif()
+    install(TARGETS printTableC
+        LIBRARY DESTINATION LuaApp/lua_modules
+        RUNTIME DESTINATION LuaApp/lua_modules
+    )
+    message(STATUS "printTableC: Lua ${LUA_VERSION_STRING} found — C extension will be built.")
+else()
+    message(WARNING
+        "Lua 5.4 development headers not found — printTableC will not be built. "
+        "Install liblua5.4-dev (Linux), brew install lua@5.4 (macOS), or "
+        "LuaForWindows (Windows) to enable the C extension.")
 endif()
 
 # ─── Install ──────────────────────────────────────────────────────────────────

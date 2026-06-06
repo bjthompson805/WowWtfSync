@@ -141,7 +141,6 @@ function thisClass:combineOne(
     end
 
     -- Return the new destination string
-    local start = os.clock()
     local newDestStrTable = {
         "AUCTIONATOR_PRICE_DATABASE = ",
         util:printTable(destAuctionatorPriceDatabase),
@@ -153,8 +152,6 @@ function thisClass:combineOne(
         table.insert(newDestStrTable, util:printTable(varValue))
         table.insert(newDestStrTable, "\n")
     end
-    local totalTime = string.format("%.2f", os.clock() - start)
-    print("Total time: " .. totalTime)
     local newDestStr = table.concat(newDestStrTable)
     self.alreadyCombined[alreadyCombinedKey] = true
     return newDestStr
