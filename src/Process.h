@@ -39,7 +39,7 @@ inline ProcessResult runProcess(const std::string& cmd)
 // Try common lua interpreter names; return the first one found in PATH, or "".
 inline std::string findLua()
 {
-    for (const char* cand : {"lua5.4", "lua54", "lua5.3", "lua"}) {
+    for (const char* cand : {"lua5.4", "lua54", "lua"}) {
 #ifdef _WIN32
         std::string check = std::string("where ") + cand + " >nul 2>&1";
 #else

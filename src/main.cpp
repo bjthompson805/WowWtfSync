@@ -1,4 +1,7 @@
 #include <SDL3/SDL.h>
+#ifdef __linux__
+#  include <dlfcn.h>   // dlopen/dlclose for libdecor presence check
+#endif
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlrenderer3.h"
@@ -21,6 +24,42 @@ int main(int /*argc*/, char* /*argv*/[])
     );
     if (!window) { SDL_Quit(); return 1; }
 
+#ifdef __linux__
+    // On Wayland, window decorations require either server-side compositor
+    // support (rare in VMs) or client-side decorations via libdecor.  If SDL
+    // chose Wayland but libdecor was not loaded into the process, the window
+    // will have no title bar.  Detect this and reinitialise with X11, which
+    // uses XWayland on Wayland compositors and always provides decorations.
+    // The check is skipped if the user explicitly set SDL_VIDEO_DRIVER so
+    // their preference is always honoured.
+    if (!SDL_getenv("SDL_VIDEO_DRIVER") &&
+        SDL_strcmp(SDL_GetCurrentVideoDriver(), "wayland") == 0)
+    {
+        // RTLD_NOLOAD: probe whether libdecor is already mapped into the
+        // process by SDL — do not load it ourselves.
+        void* libdecor = dlopen("libdecor-0.so.0", RTLD_LAZY | RTLD_NOLOAD);
+        if (!libdecor)
+        {
+            // libdecor absent: tear down and retry under X11.
+            SDL_DestroyWindow(window);
+            SDL_Quit();
+            SDL_SetHint("SDL_VIDEO_DRIVER", "x11");
+            if (!SDL_Init(SDL_INIT_VIDEO))
+            {
+                SDL_Log("SDL_Init (X11 fallback) failed: %s", SDL_GetError());
+                return 1;
+            }
+            window = SDL_CreateWindow("WowWtfSync", 1100, 720, SDL_WINDOW_RESIZABLE);
+            if (!window) { SDL_Quit(); return 1; }
+        }
+        else
+        {
+            // libdecor is loaded: Wayland decorations will work; release our probe ref.
+            dlclose(libdecor);
+        }
+    }
+#endif
+
     // Set the window icon from the embedded PNG.
     {
         int w, h, channels;
@@ -38,8 +77,19 @@ int main(int /*argc*/, char* /*argv*/[])
         }
     }
 
+    // Let SDL pick the best available hardware renderer first.
+    // If that fails (e.g. missing GPU drivers, VM without acceleration),
+    // fall back to the software renderer so the app still runs.
     SDL_Renderer* renderer = SDL_CreateRenderer(window, nullptr);
-    if (!renderer) { SDL_DestroyWindow(window); SDL_Quit(); return 1; }
+    if (!renderer)
+        renderer = SDL_CreateRenderer(window, "software");
+    if (!renderer) {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "WowWtfSync",
+            SDL_GetError(), window);
+        SDL_DestroyWindow(window);
+        SDL_Quit();
+        return 1;
+    }
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();

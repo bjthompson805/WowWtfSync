@@ -65,6 +65,14 @@ std::string PushDialog::addonDescription(const std::string& name,
 
 void PushDialog::launchPush()
 {
+    if (luaInterpreter.empty()) {
+        result = "Lua 5.4 or later was not found on this system.\n\n"
+                 "Please install Lua 5.4+ and make sure it is available in your PATH, "
+                 "then restart WowWtfSync.";
+        state = PushState::Error;
+        return;
+    }
+
     state = PushState::Running;
 
 #ifdef _WIN32
