@@ -1,3 +1,0 @@
-// Windows resource file — embeds the icon into the executable
-// (used by Explorer, taskbar, alt-tab, etc.)
-IDI_ICON1 ICON "app-icon.ico"
