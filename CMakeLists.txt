@@ -39,7 +39,7 @@ set(JSON_BuildTests OFF CACHE BOOL "" FORCE)
 set(JSON_Install    OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(nlohmann_json)
 
-# stb_image  (public domain, single header — fetched directly, no clone needed)
+# stb_image  (public domain, single header)
 set(STB_IMAGE_H "${CMAKE_BINARY_DIR}/stb_image.h")
 if(NOT EXISTS "${STB_IMAGE_H}")
     file(DOWNLOAD
@@ -52,6 +52,26 @@ if(NOT EXISTS "${STB_IMAGE_H}")
         message(FATAL_ERROR "Failed to download stb_image.h: ${stb_status}")
     endif()
 endif()
+
+# cpp-httplib  (MIT, single header — HTTPS requires OpenSSL)
+set(HTTPLIB_H "${CMAKE_BINARY_DIR}/httplib.h")
+if(NOT EXISTS "${HTTPLIB_H}")
+    file(DOWNLOAD
+        "https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h"
+        "${HTTPLIB_H}"
+        STATUS httplib_status
+    )
+    list(GET httplib_status 0 httplib_err)
+    if(httplib_err)
+        message(FATAL_ERROR "Failed to download httplib.h: ${httplib_status}")
+    endif()
+endif()
+
+# OpenSSL  (required for HTTPS in cpp-httplib)
+# Linux:   sudo apt install libssl-dev
+# macOS:   brew install openssl  (then set OPENSSL_ROOT_DIR if needed)
+# Windows: vcpkg install openssl  or  choco install openssl
+find_package(OpenSSL REQUIRED)
 
 # ─── Embed app icon PNG as a C byte array ─────────────────────────────────────
 set(ICON_PNG "${CMAKE_SOURCE_DIR}/resources/app-icon.png")
@@ -88,22 +108,28 @@ add_executable(WowWtfSync
     src/Config.cpp
     src/Logger.cpp
     src/PushDialog.cpp
+    src/ApiClient.cpp
+    src/AuthSession.cpp
     src/stb_impl.cpp
 )
 target_include_directories(WowWtfSync PRIVATE
     src
-    ${CMAKE_BINARY_DIR}   # AppIconData.h + stb_image.h
+    ${CMAKE_BINARY_DIR}   # AppIconData.h + stb_image.h + httplib.h
 )
+target_compile_definitions(WowWtfSync PRIVATE CPPHTTPLIB_OPENSSL_SUPPORT)
 target_link_libraries(WowWtfSync PRIVATE
     imgui_lib
     SDL3::SDL3-static
     nlohmann_json::nlohmann_json
+    OpenSSL::SSL
+    OpenSSL::Crypto
 )
 
-# Windows: embed the .ico into the executable and hide the console window.
+# Windows: embed .ico, hide console window, link extra SSL libs
 if(WIN32)
     target_sources(WowWtfSync PRIVATE resources/app-icon.rc)
     set_target_properties(WowWtfSync PROPERTIES WIN32_EXECUTABLE TRUE)
+    target_link_libraries(WowWtfSync PRIVATE Crypt32 Ws2_32)
 endif()
 
 # ─── Lua C extension: printTableC ────────────────────────────────────────────

@@ -2,6 +2,9 @@
 #include <map>
 #include <string>
 #include <vector>
+#include "AuthSession.h"
+#include "AccountDialog.h"
+#include "LoginScreen.h"
 #include "Config.h"
 #include "FolderPicker.h"
 #include "PushDialog.h"
@@ -14,14 +17,20 @@ public:
     App(SDL_Window* window, SDL_Renderer* renderer);
     void render();
 
-    // Called by main() when the OS/user requests a close.
-    // If there are unsaved changes a modal is shown; otherwise quit is immediate.
     void requestQuit();
-
-    // main() checks this every frame to know when it is safe to exit.
     bool shouldQuit() const { return m_quit; }
 
 private:
+    // ── Auth ───────────────────────────────────────────────────────────────
+    AuthSession   m_auth;
+    LoginScreen   m_loginScreen;
+    AccountDialog m_accountDialog;
+
+    void renderCheckingScreen();
+    void renderNoSubscriptionScreen();
+    void renderMenuBar();
+    void renderMainApp();    // the full app UI (table, panels, etc.)
+
     // ── Paths ──────────────────────────────────────────────────────────────
     std::string m_configPath;
     std::string m_pushLuaPath;
@@ -38,7 +47,6 @@ private:
 
     char m_wtfBuf[1024] = {};
 
-    // WTF scan results: account → list of "CharName-Realm"
     std::map<std::string, std::vector<std::string>> m_scanned;
     std::vector<std::string> m_accountList;
     int  m_selAccount = -1;
@@ -48,16 +56,14 @@ private:
     PushDialog   m_pushDialog;
     FolderPicker m_folderPicker;
 
-    // Pending addon index for a Push All that was deferred by the unsaved-
-    // changes modal (-1 = no deferred push).
-    int  m_pendingPushAddon = -1;
-
-    // Modal flags
-    bool m_confirmDeleteAll   = false;
-    int  m_confirmDeleteRow   = -1;
-    bool m_confirmUnsavedExit = false;   // exit with unsaved changes?
-    bool m_confirmUnsavedPush = false;   // push all with unsaved changes?
-    bool m_notifyDuplicate    = false;   // attempted to add a duplicate character
+    int  m_pendingPushAddon  = -1;
+    bool m_confirmDeleteAll      = false;
+    int  m_confirmDeleteRow      = -1;
+    bool m_confirmSignOut        = false;   // simple "are you sure?" sign-out
+    bool m_confirmUnsavedExit    = false;
+    bool m_confirmUnsavedSignOut = false;   // sign-out with unsaved changes
+    bool m_confirmUnsavedPush    = false;
+    bool m_notifyDuplicate       = false;
 
     // ── Status bar ─────────────────────────────────────────────────────────
     std::string m_statusText;
@@ -70,7 +76,6 @@ private:
     void openPushAll(int addonIdx);
     void openPushRow(int row, int addonIdx);
 
-    // UI sections
     void renderWtfBar();
     void renderPushAllBar();
     void renderCharacterTable(float tableH);

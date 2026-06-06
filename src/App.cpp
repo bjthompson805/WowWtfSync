@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "Logger.h"
 #include "WtfScanner.h"
+#include "UrlHelper.h"
 #include "imgui.h"
 #include <SDL3/SDL.h>   // SDL_GetBasePath
 #include <algorithm>
@@ -13,7 +14,6 @@ namespace fs = std::filesystem;
 // ─── Constructor ──────────────────────────────────────────────────────────────
 App::App(SDL_Window* /*window*/, SDL_Renderer* /*renderer*/)
 {
-    // Resolve paths relative to the executable directory.
     const char* base = SDL_GetBasePath();
     std::string baseDir = base ? base : "./";
 
@@ -21,12 +21,14 @@ App::App(SDL_Window* /*window*/, SDL_Renderer* /*renderer*/)
     m_pushLuaPath = baseDir + "push.lua";
     m_logPath     = baseDir + "log.txt";
 
+    m_auth.init(baseDir + "session.json");
+    m_auth.tryRestore();
+
     Logger::init(m_logPath);
     m_luaInterp = findLua();
 
-    // Load config; silently ignore missing file on first run.
     Config::load(m_configPath, m_cfg);
-    m_savedCfg = m_cfg;   // baseline for dirty tracking
+    m_savedCfg = m_cfg;
     std::snprintf(m_wtfBuf, sizeof(m_wtfBuf), "%s", m_cfg.wtfPath.c_str());
 
     if (!m_cfg.wtfPath.empty())
@@ -135,50 +137,159 @@ void App::openPushRow(int row, int addonIdx)
                       m_luaInterp, m_pushLuaPath, m_configPath);
 }
 
+// ─── Auth screens ─────────────────────────────────────────────────────────────
+
+void App::renderCheckingScreen()
+{
+    ImGuiViewport* vp = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(vp->Pos);
+    ImGui::SetNextWindowSize(vp->Size);
+    ImGui::SetNextWindowBgAlpha(1.f);
+    ImGui::Begin("##checking", nullptr,
+        ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoSavedSettings);
+
+    static const char* frames[] = {"|", "/", "-", "\\"};
+    std::string msg = std::string("Checking session... ")
+                      + frames[(int)(ImGui::GetTime() * 8) % 4];
+    float tw = ImGui::CalcTextSize(msg.c_str()).x;
+    ImGui::SetCursorPos(ImVec2(
+        (ImGui::GetWindowWidth()  - tw) * 0.5f,
+        (ImGui::GetWindowHeight() - ImGui::GetTextLineHeight()) * 0.5f));
+    ImGui::TextUnformatted(msg.c_str());
+    ImGui::End();
+}
+
+void App::renderNoSubscriptionScreen()
+{
+    ImGuiViewport* vp = ImGui::GetMainViewport();
+    ImGui::SetNextWindowPos(vp->Pos);
+    ImGui::SetNextWindowSize(vp->Size);
+    ImGui::SetNextWindowBgAlpha(1.f);
+    ImGui::Begin("##nosub", nullptr,
+        ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoSavedSettings);
+
+    const float panelW = 420.f;
+    const float panelH = 160.f;
+    ImGui::SetNextWindowPos(
+        ImVec2(vp->Pos.x + (vp->Size.x - panelW) * 0.5f,
+               vp->Pos.y + (vp->Size.y - panelH) * 0.5f));
+    ImGui::SetNextWindowSize(ImVec2(panelW, panelH));
+    ImGui::SetNextWindowBgAlpha(0.96f);
+    ImGui::Begin("##nosubPanel", nullptr,
+        ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoSavedSettings);
+
+    ImGui::Spacing();
+    ImGui::TextWrapped(
+        "Your account does not have an active subscription.\n"
+        "Please subscribe at wowwtfsync.com to use this application.");
+    ImGui::Spacing();
+
+    ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.35f, 0.65f, 1.f, 1.f));
+    ImGui::TextUnformatted("Subscribe at wowwtfsync.com");
+    ImGui::PopStyleColor();
+    if (ImGui::IsItemHovered()) ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+    if (ImGui::IsItemClicked()) openUrl(URL_SUBSCRIBE);
+
+    ImGui::Spacing();
+    ImGui::Separator();
+    ImGui::Spacing();
+    if (ImGui::Button("Sign Out")) m_auth.signOut();
+    ImGui::End();
+
+    ImGui::End();
+}
+
+void App::renderMenuBar()
+{
+    const UserInfo& u = m_auth.userInfo();
+    std::string menuLabel = "Account (" + u.username + ")";
+
+    if (ImGui::BeginMenuBar()) {
+        if (ImGui::BeginMenu(menuLabel.c_str())) {
+            if (ImGui::MenuItem("My Account"))
+                m_accountDialog.show(m_auth);
+            ImGui::Separator();
+            if (ImGui::MenuItem("Sign Out")) {
+                if (m_dirty)
+                    m_confirmUnsavedSignOut = true;
+                else
+                    m_confirmSignOut = true;
+            }
+            ImGui::EndMenu();
+        }
+        ImGui::EndMenuBar();
+    }
+}
+
+// ─── Main app content (shown only when fully logged in) ───────────────────────
+
+void App::renderMainApp()
+{
+    // Compute proportional heights for the table (75%) and scan panels (25%).
+    // Fixed overhead: menuBar + wtfBar + pushAllBar + saveRow + addBtnRow + statusBar
+    //                 + spacings.
+    float fh      = ImGui::GetFrameHeightWithSpacing();
+    float sp      = ImGui::GetStyle().ItemSpacing.y;
+    float fixedH  = fh * 6.f + sp * 4.f + 8.f;
+    float contentH = ImGui::GetWindowHeight() - fixedH;
+    if (contentH < 80.f) contentH = 80.f;
+    float tableH  = contentH * 0.75f;
+    float panelH  = contentH * 0.25f;
+
+    renderWtfBar();
+    ImGui::Spacing();
+    renderPushAllBar();
+    ImGui::Spacing();
+    renderCharacterTable(tableH);
+    ImGui::Spacing();
+    renderScanPanels(panelH);
+
+    ImGui::SetCursorPosY(
+        ImGui::GetWindowHeight() - ImGui::GetFrameHeightWithSpacing() - 4.f);
+    renderStatusBar();
+}
+
 // ─── Top-level render ─────────────────────────────────────────────────────────
 
 void App::render()
 {
-    // Full-screen dockspace window.
+    AuthState state = m_auth.state();
+
+    if (state == AuthState::Checking) {
+        renderCheckingScreen();
+        return;
+    }
+    if (state == AuthState::LoggedOut) {
+        m_loginScreen.render(m_auth);
+        return;
+    }
+    if (state == AuthState::NoSubscription) {
+        renderNoSubscriptionScreen();
+        return;
+    }
+
+    // LoggedIn — full application.
     ImGuiViewport* vp = ImGui::GetMainViewport();
     ImGui::SetNextWindowPos(vp->Pos);
     ImGui::SetNextWindowSize(vp->Size);
     ImGui::SetNextWindowBgAlpha(1.f);
     ImGui::Begin("##main", nullptr,
-        ImGuiWindowFlags_NoDecoration |
-        ImGuiWindowFlags_NoMove       |
-        ImGuiWindowFlags_NoSavedSettings);
+        ImGuiWindowFlags_NoDecoration    |
+        ImGuiWindowFlags_NoMove          |
+        ImGuiWindowFlags_NoSavedSettings |
+        ImGuiWindowFlags_MenuBar);
 
-    // Compute proportional heights for the table (75%) and scan panels (25%).
-    // Fixed overhead: wtfBar + pushAllBar + saveRow + addBtnRow + statusBar
-    //                 + 4 spacings between sections + a little padding.
-    {
-        float fh      = ImGui::GetFrameHeightWithSpacing();
-        float sp      = ImGui::GetStyle().ItemSpacing.y;
-        float fixedH  = fh * 5.f + sp * 4.f + 8.f;
-        float contentH = ImGui::GetWindowHeight() - fixedH;
-        if (contentH < 80.f) contentH = 80.f;
-        float tableH  = contentH * 0.75f;
-        float panelH  = contentH * 0.25f;
-
-        renderWtfBar();
-        ImGui::Spacing();
-        renderPushAllBar();
-        ImGui::Spacing();
-        renderCharacterTable(tableH);
-        ImGui::Spacing();
-        renderScanPanels(panelH);
-    }
-
-    // Status bar pinned to bottom of the main window.
-    ImGui::SetCursorPosY(
-        ImGui::GetWindowHeight() - ImGui::GetFrameHeightWithSpacing() - 4.f);
-    renderStatusBar();
+    renderMenuBar();
+    renderMainApp();
 
     ImGui::End();
 
     renderModals();
     m_pushDialog.render();
+    m_accountDialog.render(m_auth);
 
     if (m_folderPicker.render()) {
         std::snprintf(m_wtfBuf, sizeof(m_wtfBuf),
@@ -536,6 +647,61 @@ void App::renderModals()
             ImGui::SameLine();
             if (ImGui::Button("No", ImVec2(80,0))) {
                 m_confirmDeleteAll = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
+    // Sign out confirmation
+    if (m_confirmSignOut) {
+        ImGui::OpenPopup("##confirmSignOut");
+        ImVec2 c = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(c, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("##confirmSignOut", nullptr,
+                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar))
+        {
+            ImGui::TextUnformatted("Are you sure you want to sign out?");
+            ImGui::Spacing();
+            if (ImGui::Button("Sign Out", ImVec2(90, 0))) {
+                m_auth.signOut();
+                m_confirmSignOut = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(80, 0))) {
+                m_confirmSignOut = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::EndPopup();
+        }
+    }
+
+    // Unsaved changes — sign out
+    if (m_confirmUnsavedSignOut) {
+        ImGui::OpenPopup("##confirmUnsavedSignOut");
+        ImVec2 c = ImGui::GetMainViewport()->GetCenter();
+        ImGui::SetNextWindowPos(c, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
+        if (ImGui::BeginPopupModal("##confirmUnsavedSignOut", nullptr,
+                ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoTitleBar))
+        {
+            ImGui::TextUnformatted("You have unsaved changes. Save before signing out?");
+            ImGui::Spacing();
+            if (ImGui::Button("Save & Sign Out", ImVec2(130, 0))) {
+                saveConfig();
+                m_auth.signOut();
+                m_confirmUnsavedSignOut = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Sign Out without Saving", ImVec2(175, 0))) {
+                m_auth.signOut();
+                m_confirmUnsavedSignOut = false;
+                ImGui::CloseCurrentPopup();
+            }
+            ImGui::SameLine();
+            if (ImGui::Button("Cancel", ImVec2(80, 0))) {
+                m_confirmUnsavedSignOut = false;
                 ImGui::CloseCurrentPopup();
             }
             ImGui::EndPopup();
