@@ -341,6 +341,18 @@ void App::renderPushAllBar()
             }
         }
     }
+    // "ALL ^" button — slightly separated; pushes every supported addon in one run.
+    ImGui::SameLine();
+    ImGui::Dummy(ImVec2(8.f, 0));
+    ImGui::SameLine();
+    if (ImGui::Button("ALL ^##pushallall")) {
+        if (m_dirty) {
+            m_pendingPushAddon   = -1;   // -1 = all addons
+            m_confirmUnsavedPush = true;
+        } else {
+            openPushAll(-1);
+        }
+    }
     if (noChars) ImGui::EndDisabled();
 }
 
@@ -453,6 +465,11 @@ void App::renderCharacterTable(float tableH)
                         pushRow   = row;
                         pushAddon = ai;
                     }
+                }
+                ImGui::Separator();
+                if (ImGui::MenuItem("ALL")) {
+                    pushRow   = row;
+                    pushAddon = -1;   // -1 = all addons
                 }
                 ImGui::EndPopup();
             }

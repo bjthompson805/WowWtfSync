@@ -10,8 +10,13 @@ void PushDialog::show(int addonIndex,
                       const std::string& pushLua,
                       const std::string& cfgPath)
 {
-    addonName      = ADDON_NAMES[addonIndex];
-    addonKey       = ADDON_KEYS[addonIndex];
+    if (addonIndex < 0) {
+        addonName = "All Addons";
+        addonKey  = "all";
+    } else {
+        addonName = ADDON_NAMES[addonIndex];
+        addonKey  = ADDON_KEYS[addonIndex];
+    }
     characterArg   = charArg;
     characterLabel = charLabel;
     luaInterpreter = lua;
@@ -32,6 +37,12 @@ std::string PushDialog::addonDescription(const std::string& name,
                                           const std::string& charArg)
 {
     bool allChars = (charLabel == "All Characters");
+    if (name == "All Addons")
+        return allChars
+            ? "Push all supported addon data (Altoholic, Auctionator, Bagnon, NovaWorldBuffs, TitanGold) "
+              "from all accounts."
+            : "Push all supported addon data (Altoholic, Auctionator, Bagnon, NovaWorldBuffs, TitanGold) "
+              "for " + charArg + " to all other accounts.";
     if (name == "Altoholic")
         return allChars
             ? "Push Altoholic data from all accounts, combining the data."
@@ -112,7 +123,7 @@ bool PushDialog::render()
         // ── Body (idle / running / done / error) ─────────────────────────
         if (state == PushState::Idle || state == PushState::Running) {
             bool allChars = (characterLabel == "All Characters");
-            if (addonName != "Altoholic") {
+            if (addonName != "Altoholic" && addonName != "All Addons") {
                 std::string sentence1 = "Push " + addonName + " data from "
                     + (allChars ? "each character" : characterArg)
                     + " to all accounts that are not the same as the character's account.";

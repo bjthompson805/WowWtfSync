@@ -7,7 +7,19 @@ local class = require "30log"
 
 local thisClass = class("DataCombine.DataCombineFactory")
 
--- This method creates an instance of the given module name.
+local SUPPORTED_ADDONS = {
+    "Altoholic",
+    "Auctionator",
+    "Bagnon",
+    "NovaWorldBuffs",
+    "TitanGold",
+}
+
+function thisClass:getSupportedAddonNames()
+    return SUPPORTED_ADDONS
+end
+
+-- This method creates an instance (or instances) for the given addon name.
 -- Input:
 --     addonName [string] - name of the addon
 -- Output:
