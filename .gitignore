@@ -3,3 +3,4 @@ release/
 imgui.ini
 LuaApp/lua_modules/printTableC.so
 LuaApp/lua_modules/printTableC.dll
+*.DS_Store

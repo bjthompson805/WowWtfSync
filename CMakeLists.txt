@@ -74,7 +74,7 @@ endif()
 find_package(OpenSSL REQUIRED)
 
 # ─── Embed app icon PNG as a C byte array ─────────────────────────────────────
-set(ICON_PNG "${CMAKE_SOURCE_DIR}/resources/app-icon.png")
+set(ICON_PNG "${CMAKE_SOURCE_DIR}/resources/app-icon-mac.png")
 file(READ "${ICON_PNG}" ICON_HEX HEX)
 string(LENGTH "${ICON_HEX}" ICON_HEX_LEN)
 math(EXPR ICON_BYTE_COUNT "${ICON_HEX_LEN} / 2")
@@ -132,8 +132,23 @@ if(WIN32)
     target_link_libraries(WowWtfSync PRIVATE Crypt32 Ws2_32)
 endif()
 
-# macOS: link Security framework (needed by cpp-httplib for system cert loading)
+# macOS: .app bundle + Security framework
 if(APPLE)
+    set(APP_ICNS "${CMAKE_SOURCE_DIR}/resources/app-icon.icns")
+    set_source_files_properties(${APP_ICNS} PROPERTIES
+        MACOSX_PACKAGE_LOCATION "Resources"
+    )
+    target_sources(WowWtfSync PRIVATE ${APP_ICNS})
+
+    set_target_properties(WowWtfSync PROPERTIES
+        MACOSX_BUNDLE                   TRUE
+        MACOSX_BUNDLE_BUNDLE_NAME       "WowWtfSync"
+        MACOSX_BUNDLE_BUNDLE_VERSION    "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_GUI_IDENTIFIER    "com.brandont.WowWtfSync"
+        MACOSX_BUNDLE_ICON_FILE         "app-icon.icns"
+    )
+
     target_link_libraries(WowWtfSync PRIVATE "-framework Security")
 endif()
 
@@ -169,4 +184,7 @@ else()
 endif()
 
 # ─── Install ──────────────────────────────────────────────────────────────────
-install(TARGETS WowWtfSync RUNTIME DESTINATION .)
+install(TARGETS WowWtfSync
+    BUNDLE  DESTINATION .
+    RUNTIME DESTINATION .
+)
