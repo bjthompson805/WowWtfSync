@@ -132,6 +132,11 @@ if(WIN32)
     target_link_libraries(WowWtfSync PRIVATE Crypt32 Ws2_32)
 endif()
 
+# macOS: link Security framework (needed by cpp-httplib for system cert loading)
+if(APPLE)
+    target_link_libraries(WowWtfSync PRIVATE "-framework Security")
+endif()
+
 # ─── Lua C extension: printTableC ────────────────────────────────────────────
 find_package(Lua 5.4)
 if(LUA_FOUND)
