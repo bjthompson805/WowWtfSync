@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <cstdio>
+#include <filesystem>
 
 #ifndef _WIN32
 #  include <sys/wait.h>
@@ -36,9 +37,29 @@ inline ProcessResult runProcess(const std::string& cmd)
     return r;
 }
 
-// Try common lua interpreter names; return the first one found in PATH, or "".
+// Try common lua interpreter names; return the first one found, or "".
 inline std::string findLua()
 {
+#ifndef _WIN32
+    // On macOS/Linux, GUI apps may have a stripped PATH that omits Homebrew,
+    // MacPorts, or /usr/local. Probe known absolute locations first.
+    static const char* kAbsolutePaths[] = {
+        "/opt/homebrew/bin/lua5.4",   // Homebrew, Apple Silicon
+        "/opt/homebrew/bin/lua",
+        "/usr/local/bin/lua5.4",      // Homebrew, Intel / Linux
+        "/usr/local/bin/lua54",
+        "/usr/local/bin/lua",
+        "/opt/local/bin/lua5.4",      // MacPorts
+        "/opt/local/bin/lua",
+        nullptr
+    };
+    for (const char** p = kAbsolutePaths; *p; ++p) {
+        if (std::filesystem::exists(*p))
+            return *p;
+    }
+#endif
+
+    // Fall back to PATH-based lookup (works in terminals and on Windows).
     for (const char* cand : {"lua5.4", "lua54", "lua"}) {
 #ifdef _WIN32
         std::string check = std::string("where ") + cand + " >nul 2>&1";

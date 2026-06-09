@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
-project(WowWtfSync VERSION 0.1.0 LANGUAGES CXX C)
+project(WowWtfSync VERSION 1.0.0 LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -152,6 +152,23 @@ if(APPLE)
     target_link_libraries(WowWtfSync PRIVATE "-framework Security")
 endif()
 
+# ─── Copy Lua resources into build output ─────────────────────────────────────
+if(APPLE)
+    set(LUA_DEST "$<TARGET_BUNDLE_DIR:WowWtfSync>/Contents/Resources")
+else()
+    set(LUA_DEST "$<TARGET_FILE_DIR:WowWtfSync>")
+endif()
+
+add_custom_command(TARGET WowWtfSync POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+        "${CMAKE_SOURCE_DIR}/push.lua"
+        "${LUA_DEST}/push.lua"
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        "${CMAKE_SOURCE_DIR}/LuaApp"
+        "${LUA_DEST}/LuaApp"
+    COMMENT "Copying Lua resources to build output"
+)
+
 # ─── Lua C extension: printTableC ────────────────────────────────────────────
 find_package(Lua 5.4)
 if(LUA_FOUND)
@@ -171,10 +188,12 @@ if(LUA_FOUND)
     elseif(WIN32)
         target_link_libraries(printTableC PRIVATE ${LUA_LIBRARIES})
     endif()
-    install(TARGETS printTableC
-        LIBRARY DESTINATION LuaApp/lua_modules
-        RUNTIME DESTINATION LuaApp/lua_modules
-    )
+    if(NOT APPLE)
+        install(TARGETS printTableC
+            LIBRARY DESTINATION LuaApp/lua_modules
+            RUNTIME DESTINATION LuaApp/lua_modules
+        )
+    endif()
     message(STATUS "printTableC: Lua ${LUA_VERSION_STRING} found — C extension will be built.")
 else()
     message(WARNING
@@ -188,3 +207,15 @@ install(TARGETS WowWtfSync
     BUNDLE  DESTINATION .
     RUNTIME DESTINATION .
 )
+
+# ─── CPack / DMG packaging (macOS only) ───────────────────────────────────────
+if(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+    set(CPACK_PACKAGE_NAME "WowWtfSync")
+    set(CPACK_PACKAGE_VENDOR "Brandon T")
+    set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+    set(CPACK_PACKAGE_FILE_NAME "WowWtfSync-${PROJECT_VERSION}-macOS")
+    set(CPACK_DMG_VOLUME_NAME "WowWtfSync")
+    set(CPACK_DMG_FORMAT "UDZO")   # zlib-compressed — smaller download
+    include(CPack)
+endif()
