@@ -12,8 +12,12 @@
 namespace fs = std::filesystem;
 
 // ─── Constructor ──────────────────────────────────────────────────────────────
-App::App(SDL_Window* /*window*/, SDL_Renderer* /*renderer*/)
+App::App(SDL_Window* /*window*/, SDL_Renderer* /*renderer*/, float dpiScale)
 {
+    m_dpiScale = (dpiScale >= 1.0f) ? dpiScale : 1.0f;
+    m_loginScreen.dpiScale    = m_dpiScale;
+    m_accountDialog.dpiScale  = m_dpiScale;
+    m_pushDialog.dpiScale     = m_dpiScale;
     const char* base = SDL_GetBasePath();
     std::string baseDir = base ? base : "./";
 
@@ -170,8 +174,8 @@ void App::renderNoSubscriptionScreen()
         ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoMove |
         ImGuiWindowFlags_NoSavedSettings);
 
-    const float panelW = 420.f;
-    const float panelH = 160.f;
+    const float panelW = 420.f * m_dpiScale;
+    const float panelH = 160.f * m_dpiScale;
     ImGui::SetNextWindowPos(
         ImVec2(vp->Pos.x + (vp->Size.x - panelW) * 0.5f,
                vp->Pos.y + (vp->Size.y - panelH) * 0.5f));
@@ -305,7 +309,7 @@ void App::renderWtfBar()
     ImGui::SameLine();
 
     float availW = ImGui::GetContentRegionAvail().x;
-    float btnW   = 80.f;
+    float btnW   = 80.f * m_dpiScale;
     float spacing = ImGui::GetStyle().ItemSpacing.x;
     float inputW  = availW - btnW * 2 - spacing * 2;
 
@@ -343,7 +347,7 @@ void App::renderPushAllBar()
     }
     // "ALL ^" button — slightly separated; pushes every supported addon in one run.
     ImGui::SameLine();
-    ImGui::Dummy(ImVec2(8.f, 0));
+    ImGui::Dummy(ImVec2(8.f * m_dpiScale, 0));
     ImGui::SameLine();
     if (ImGui::Button("ALL ^##pushallall")) {
         if (m_dirty) {
@@ -374,7 +378,7 @@ void App::renderCharacterTable(float tableH)
     // When the table is empty show a help text placeholder instead of an empty table.
     float saveRowH = ImGui::GetFrameHeightWithSpacing();
     tableH -= saveRowH;
-    if (tableH < 40.f) tableH = 40.f;
+    if (tableH < 40.f * m_dpiScale) tableH = 40.f * m_dpiScale;
 
     if (m_cfg.characters.empty()) {
         // Placeholder: centered help text telling the user how to get started.
@@ -409,12 +413,12 @@ void App::renderCharacterTable(float tableH)
     if (ImGui::BeginTable("##chars", 6, flags, ImVec2(0, tableH))) {
         // Columns: [X] [^] Character Account Faction Enabled
         ImGui::TableSetupScrollFreeze(0, 1);
-        ImGui::TableSetupColumn("##del",   ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 26.f);
-        ImGui::TableSetupColumn("##push",  ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 26.f);
+        ImGui::TableSetupColumn("##del",   ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 26.f * m_dpiScale);
+        ImGui::TableSetupColumn("##push",  ImGuiTableColumnFlags_NoSort | ImGuiTableColumnFlags_WidthFixed | ImGuiTableColumnFlags_NoResize, 26.f * m_dpiScale);
         ImGui::TableSetupColumn("Character", ImGuiTableColumnFlags_DefaultSort | ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableSetupColumn("Account",   ImGuiTableColumnFlags_WidthStretch);
         ImGui::TableSetupColumn("Faction",   ImGuiTableColumnFlags_WidthStretch);
-        ImGui::TableSetupColumn("Enabled",   ImGuiTableColumnFlags_WidthFixed, 60.f);
+        ImGui::TableSetupColumn("Enabled",   ImGuiTableColumnFlags_WidthFixed, 60.f * m_dpiScale);
         ImGui::TableHeadersRow();
 
         // Handle sort request.
@@ -542,7 +546,7 @@ void App::renderCharacterTable(float tableH)
         if (!hasChars) ImGui::EndDisabled();
 
         ImGui::SameLine();
-        float saveW = 80.f;
+        float saveW = 80.f * m_dpiScale;
         ImGui::SetCursorPosX(
             ImGui::GetCursorPosX()
             + ImGui::GetContentRegionAvail().x - saveW);
@@ -561,7 +565,7 @@ void App::renderScanPanels(float panelH)
     float availW = ImGui::GetContentRegionAvail().x;
     // Subtract the Add button row so the panels don't overflow.
     panelH -= ImGui::GetFrameHeightWithSpacing();
-    if (panelH < 30.f) panelH = 30.f;
+    if (panelH < 30.f * m_dpiScale) panelH = 30.f * m_dpiScale;
     float halfW  = (availW - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
     // Left panel: accounts
@@ -593,7 +597,7 @@ void App::renderScanPanels(float panelH)
     ImGui::EndChild();
 
     // Add button: right-justified, below the right panel
-    float addW = 80.f;
+    float addW = 80.f * m_dpiScale;
     ImGui::SetCursorPosX(ImGui::GetCursorPosX() + availW - addW);
     bool canAdd = (m_selChar >= 0);
     if (!canAdd) ImGui::BeginDisabled();

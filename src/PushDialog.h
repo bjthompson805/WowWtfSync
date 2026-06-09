@@ -26,7 +26,8 @@ struct PushDialog {
     std::string pushLuaPath;
     std::string configPath;
 
-    PushState   state  = PushState::Idle;
+    PushState   state     = PushState::Idle;
+    float       dpiScale  = 1.0f;
     std::string result;             // success or error message from push.lua
     std::string popupId;            // ImGui popup ID (title + ##tag)
     std::future<ProcessResult> future;

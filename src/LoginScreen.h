@@ -10,6 +10,7 @@ struct LoginScreen {
     char  passwordBuf[256] = {};
     bool  showForgot       = false;
     char  forgotEmailBuf[256] = {};
+    float dpiScale         = 1.0f;
 
     void render(AuthSession& auth)
     {
@@ -54,8 +55,8 @@ private:
     void renderLogin(AuthSession& auth)
     {
         ImGuiViewport* vp = ImGui::GetMainViewport();
-        const float panelW = 380.f;
-        const float panelH = 290.f;
+        const float panelW = 380.f * dpiScale;
+        const float panelH = 290.f * dpiScale;
         ImGui::SetNextWindowPos(
             ImVec2(vp->Pos.x + (vp->Size.x - panelW) * 0.5f,
                    vp->Pos.y + (vp->Size.y - panelH) * 0.5f));
@@ -133,8 +134,8 @@ private:
     void renderForgotPassword(AuthSession& auth)
     {
         ImGuiViewport* vp = ImGui::GetMainViewport();
-        const float panelW = 380.f;
-        const float panelH = 230.f;
+        const float panelW = 380.f * dpiScale;
+        const float panelH = 230.f * dpiScale;
         ImGui::SetNextWindowPos(
             ImVec2(vp->Pos.x + (vp->Size.x - panelW) * 0.5f,
                    vp->Pos.y + (vp->Size.y - panelH) * 0.5f));

@@ -5,7 +5,8 @@
 
 // "My Account" modal — opened from the menu bar.
 struct AccountDialog {
-    bool open = false;
+    bool  open     = false;
+    float dpiScale = 1.0f;
 
     void show(AuthSession& auth)
     {
@@ -21,7 +22,7 @@ struct AccountDialog {
         ImGui::OpenPopup("My Account##acctdlg");
         ImVec2 center = ImGui::GetMainViewport()->GetCenter();
         ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-        ImGui::SetNextWindowSize(ImVec2(420, 0), ImGuiCond_Always);
+        ImGui::SetNextWindowSize(ImVec2(420 * dpiScale, 0), ImGuiCond_Always);
 
         bool dismissed = false;
         if (ImGui::BeginPopupModal("My Account##acctdlg", &open,
@@ -36,7 +37,7 @@ struct AccountDialog {
             // Subscription status with colour coding
             const char* status = u.subStatus.empty() ? "N/A" : u.subStatus.c_str();
             ImGui::TextUnformatted("Subscription:");
-            ImGui::SameLine(130.f);
+            ImGui::SameLine(130.f * dpiScale);
             if (u.subStatus == "active")
                 ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.3f, 1.f, 0.4f, 1.f));
             else
@@ -62,7 +63,7 @@ struct AccountDialog {
             if (ImGui::IsItemClicked()) openUrl(URL_DASHBOARD);
 
             ImGui::SameLine();
-            float okW = 60.f;
+            float okW = 60.f * dpiScale;
             ImGui::SetCursorPosX(
                 ImGui::GetCursorPosX()
                 + ImGui::GetContentRegionAvail().x - okW);
@@ -81,10 +82,10 @@ struct AccountDialog {
     }
 
 private:
-    static void renderRow(const char* label, const char* value)
+    void renderRow(const char* label, const char* value) const
     {
         ImGui::TextUnformatted(label);
-        ImGui::SameLine(130.f);
+        ImGui::SameLine(130.f * dpiScale);
         ImGui::TextUnformatted(value);
     }
 };

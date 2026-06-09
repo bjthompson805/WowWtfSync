@@ -105,7 +105,7 @@ bool PushDialog::render()
 
     ImVec2 center = ImGui::GetMainViewport()->GetCenter();
     ImGui::SetNextWindowPos(center, ImGuiCond_Always, ImVec2(0.5f, 0.5f));
-    ImGui::SetNextWindowSize(ImVec2(540, 0), ImGuiCond_Always);
+    ImGui::SetNextWindowSize(ImVec2(540 * dpiScale, 0), ImGuiCond_Always);
 
     bool dismissed = false;
 
@@ -158,7 +158,7 @@ bool PushDialog::render()
                 ImGui::SameLine();
                 ImGui::TextUnformatted(frames[(int)(ImGui::GetTime() * 8) % 4]);
             } else {
-                float btnW = 120.f;
+                float btnW = 120.f * dpiScale;
                 ImGui::SetCursorPosX(
                     ImGui::GetCursorPosX()
                     + ImGui::GetContentRegionAvail().x - btnW);
@@ -169,7 +169,7 @@ bool PushDialog::render()
         else if (state == PushState::Done) {
             ImGui::TextWrapped("%s", result.c_str());
             ImGui::Spacing();
-            if (ImGui::Button("OK", ImVec2(120, 0)))
+            if (ImGui::Button("OK", ImVec2(120 * dpiScale, 0)))
                 dismissed = true;
         }
         else { // Error
@@ -177,7 +177,7 @@ bool PushDialog::render()
             ImGui::TextWrapped("Error:\n%s", result.c_str());
             ImGui::PopStyleColor();
             ImGui::Spacing();
-            if (ImGui::Button("OK", ImVec2(120, 0)))
+            if (ImGui::Button("OK", ImVec2(120 * dpiScale, 0)))
                 dismissed = true;
         }
 

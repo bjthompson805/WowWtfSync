@@ -14,13 +14,15 @@ struct SDL_Renderer;
 
 class App {
 public:
-    App(SDL_Window* window, SDL_Renderer* renderer);
+    App(SDL_Window* window, SDL_Renderer* renderer, float dpiScale = 1.0f);
     void render();
 
     void requestQuit();
     bool shouldQuit() const { return m_quit; }
 
 private:
+    float         m_dpiScale = 1.0f;
+
     // ── Auth ───────────────────────────────────────────────────────────────
     AuthSession   m_auth;
     LoginScreen   m_loginScreen;

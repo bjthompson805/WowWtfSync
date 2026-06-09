@@ -1,4 +1,5 @@
 #include <SDL3/SDL.h>
+#include <cmath>
 #ifdef __linux__
 #  include <dlfcn.h>   // dlopen/dlclose for libdecor presence check
 #endif
@@ -17,10 +18,18 @@ int main(int /*argc*/, char* /*argv*/[])
         return 1;
     }
 
+    // Query the display content scale before creating the window so the initial
+    // size is correct for the user's DPI setting (e.g. 200% on a 4K display).
+    SDL_DisplayID primaryDisplay = SDL_GetPrimaryDisplay();
+    float initScale = (primaryDisplay != 0)
+                      ? SDL_GetDisplayContentScale(primaryDisplay)
+                      : 1.0f;
+    if (initScale < 1.0f) initScale = 1.0f;
+
     SDL_Window* window = SDL_CreateWindow(
         "WowWtfSync",
-        1100, 720,
-        SDL_WINDOW_RESIZABLE
+        (int)(1100 * initScale), (int)(720 * initScale),
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY
     );
     if (!window) { SDL_Quit(); return 1; }
 
@@ -49,7 +58,9 @@ int main(int /*argc*/, char* /*argv*/[])
                 SDL_Log("SDL_Init (X11 fallback) failed: %s", SDL_GetError());
                 return 1;
             }
-            window = SDL_CreateWindow("WowWtfSync", 1100, 720, SDL_WINDOW_RESIZABLE);
+            window = SDL_CreateWindow("WowWtfSync",
+                (int)(1100 * initScale), (int)(720 * initScale),
+                SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
             if (!window) { SDL_Quit(); return 1; }
         }
         else
@@ -97,10 +108,20 @@ int main(int /*argc*/, char* /*argv*/[])
     io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
     ImGui::StyleColorsDark();
 
+    // Scale font and style for HiDPI displays.
+    // Prefer the per-window scale (accounts for multi-monitor setups);
+    // fall back to initScale if the query fails.
+    float dpiScale = SDL_GetWindowDisplayScale(window);
+    if (dpiScale < 1.0f) dpiScale = initScale;
+    ImFontConfig fontCfg;
+    fontCfg.SizePixels = std::round(13.0f * dpiScale);
+    io.Fonts->AddFontDefault(&fontCfg);
+    ImGui::GetStyle().ScaleAllSizes(dpiScale);
+
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
 
-    App app(window, renderer);
+    App app(window, renderer, dpiScale);
 
     bool running = true;
     while (running)
