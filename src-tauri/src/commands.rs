@@ -210,8 +210,22 @@ fn find_push_lua(app: &AppHandle) -> Result<PathBuf, String> {
 }
 
 fn find_lua_exe() -> Result<String, String> {
-    // Try common Lua 5.4 executable names across platforms.
-    let candidates = ["lua5.4", "lua54", "lua-5.4", "lua"];
+    // On Windows, check for a bundled lua/ directory next to the executable first.
+    #[cfg(target_os = "windows")]
+    if let Ok(exe) = std::env::current_exe() {
+        if let Some(exe_dir) = exe.parent() {
+            let lua_dir = exe_dir.join("lua");
+            for name in &["lua54.exe", "lua55.exe", "lua-5.4.exe", "lua-5.5.exe", "lua.exe"] {
+                let candidate = lua_dir.join(name);
+                if candidate.exists() {
+                    return Ok(candidate.to_string_lossy().into_owned());
+                }
+            }
+        }
+    }
+
+    // Fall back to common Lua 5.4 executable names on PATH.
+    let candidates = ["lua5.4", "lua55", "lua54", "lua-5.4", "lua-5.5", "lua"];
     for candidate in &candidates {
         if std::process::Command::new(candidate)
             .arg("-v")

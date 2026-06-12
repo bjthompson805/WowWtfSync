@@ -5065,6 +5065,7 @@ dependencies = [
 name = "wowwtfsync"
 version = "1.0.0"
 dependencies = [
+ "cc",
  "chrono",
  "serde",
  "serde_json",
