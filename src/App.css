@@ -256,7 +256,8 @@ body {
   display: flex;
   align-items: center;
   gap: 3px;
-  padding: 3px 5px;
+  padding: 3px 3px;
+  justify-content: center;
 }
 
 .td-text {

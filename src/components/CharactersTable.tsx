@@ -21,8 +21,8 @@ const COL_ACCOUNT = 2;
 const COL_FACTION = 3;
 const COL_ENABLED = 4;
 
-const MIN_WIDTHS = [72, 100, 100, 90, 72];
-const INIT_WIDTHS = [72, 220, 200, 120, 80];
+const MIN_WIDTHS = [42, 100, 100, 90, 65];
+const INIT_WIDTHS = [42, 220, 200, 120, 65];
 
 export default function CharactersTable({
   characters,
