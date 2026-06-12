@@ -1,3 +1,30 @@
+// Auth / Session types
+
+export interface SessionUser {
+  id: number;
+  username: string;
+  email: string;
+}
+
+export interface Session {
+  accessToken: string;
+  refreshToken: string;
+  user: SessionUser;
+}
+
+// Full account info from GET /api/auth/me
+export interface MeInfo {
+  id: number;
+  username: string;
+  email: string;
+  sub_status: string | null;
+  current_period_end: string | null;
+  cancel_at_period_end: number | null;
+  license_key: string | null;
+}
+
+// App types
+
 export const ADDONS = [
   'Altoholic',
   'Auctionator',
@@ -9,7 +36,7 @@ export const ADDONS = [
 export type Addon = (typeof ADDONS)[number];
 export type Faction = 'Alliance' | 'Horde';
 
-/** Full character record used in React state (includes client-side id). */
+// Full character record used in React state (includes client-side id).
 export interface Character {
   id: string;
   characterName: string;
@@ -19,7 +46,7 @@ export interface Character {
   enabled: boolean;
 }
 
-/** Shape written to / read from config.json (no client-side id). */
+// Shape written to / read from config.json (no client-side id).
 export interface ConfigCharacter {
   characterName: string;
   realmName: string;
@@ -43,13 +70,13 @@ export interface AccountInfo {
   characters: CharacterEntry[];
 }
 
-/** What the PushDialog needs to open. */
+// What the PushDialog needs to open.
 export interface PushTarget {
-  /** A specific addon name, or 'all' to push every addon. */
+  // A specific addon name, or 'all' to push every addon.
   addon: Addon | 'all';
-  /** 'CharacterName-RealmName-Account' or 'all' */
+  // 'CharacterName-RealmName-Account' or 'all'
   character: string;
-  /** Human-readable label for the dialog header. */
+  // Human-readable label for the dialog header.
   displayName: string;
 }
 

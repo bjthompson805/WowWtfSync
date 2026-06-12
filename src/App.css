@@ -552,6 +552,235 @@ body {
   text-align: center;
 }
 
+/* ── Login screen ──────────────────────────────────────────────────────────── */
+.login-screen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: var(--bg);
+}
+
+.login-card {
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+  padding: 32px 36px;
+  width: 340px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.login-header { text-align: center; }
+
+.login-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  font-size: 12px;
+  color: var(--text-dim);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.login-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.login-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.login-input {
+  padding: 7px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-size: 13px;
+  font-family: var(--font);
+  outline: none;
+  transition: border-color 0.1s;
+}
+.login-input:focus { border-color: var(--accent); }
+.login-input:disabled { opacity: 0.5; }
+
+.login-field-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.login-link {
+  font-size: 12px;
+  color: var(--accent-h);
+  text-decoration: none;
+}
+.login-link:hover { text-decoration: underline; }
+
+.login-error {
+  background: rgba(241, 76, 76, 0.1);
+  border: 1px solid var(--error-fg);
+  border-radius: 3px;
+  padding: 8px 10px;
+  font-size: 12px;
+  color: var(--error-fg);
+  line-height: 1.4;
+}
+
+.login-submit { width: 100%; justify-content: center; }
+
+.login-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 12px;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.login-footer-text { color: var(--text-dim); }
+
+/* ── Menu bar ──────────────────────────────────────────────────────────────── */
+.menu-bar {
+  display: flex;
+  align-items: center;
+  background: var(--bg-2);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  height: 26px;
+}
+
+.menu-bar-item {
+  position: relative;
+}
+
+.menu-bar-btn {
+  height: 26px;
+  padding: 0 10px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 12px;
+  font-family: var(--font);
+  cursor: pointer;
+  outline: none;
+}
+.menu-bar-btn:hover,
+.menu-bar-btn-active { background: var(--accent); }
+
+.menu-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 500;
+  background: var(--bg-3);
+  border: 1px solid var(--border-2);
+  border-radius: 4px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.55);
+  min-width: 160px;
+  overflow: hidden;
+  padding: 3px 0;
+}
+
+.menu-dropdown-item {
+  display: block;
+  width: 100%;
+  padding: 6px 14px;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 12px;
+  font-family: var(--font);
+  text-align: left;
+  cursor: pointer;
+}
+.menu-dropdown-item:hover { background: var(--selected-bg); }
+
+.menu-dropdown-item-danger { color: var(--danger); }
+.menu-dropdown-item-danger:hover { background: rgba(199,46,46,0.2); color: var(--danger-h); }
+
+.menu-dropdown-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 3px 0;
+}
+
+/* ── My Account dialog ─────────────────────────────────────────────────────── */
+.account-dialog { max-width: 400px; }
+
+.account-dialog-header {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.account-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.account-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  min-width: 110px;
+  flex-shrink: 0;
+}
+
+.account-value {
+  font-size: 13px;
+  color: var(--text);
+  word-break: break-all;
+}
+
+.account-license {
+  font-family: 'Consolas', 'Courier New', monospace;
+  font-size: 12px;
+  color: var(--success-fg);
+}
+
+.account-sub-active   { color: var(--success-fg); }
+.account-sub-inactive { color: var(--error-fg); }
+
+.account-loading { color: var(--text-dim); font-style: italic; }
+.account-error   { color: var(--error-fg); }
+
+.account-dialog-footer { justify-content: space-between; }
+
+.account-dashboard-btn {
+  font-size: 12px;
+  color: var(--accent-h);
+  border-color: var(--accent);
+}
+
 /* ── Scrollbars ────────────────────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
 ::-webkit-scrollbar-track { background: var(--bg-2); }

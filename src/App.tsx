@@ -9,7 +9,10 @@ import {
   type CharacterEntry,
   type ConfigCharacter,
   type PushTarget,
+  type Session,
 } from './types';
+import LoginScreen from './components/LoginScreen';
+import AccountMenu from './components/AccountMenu';
 import WtfFolderInput from './components/WtfFolderInput';
 import PushAllBar from './components/PushAllBar';
 import CharactersTable from './components/CharactersTable';
@@ -29,6 +32,36 @@ function toConfigCharacters(list: Character[]): ConfigCharacter[] {
 }
 
 export default function App() {
+  // Auth state
+  const [session, setSession] = useState<Session | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    invoke<Session | null>('auth_get_session')
+      .then(s => { setSession(s ?? null); })
+      .catch(() => {})
+      .finally(() => setAuthChecked(true));
+  }, []);
+
+  const handleLogin = (s: Session) => setSession(s);
+
+  const handleSignOut = async () => {
+    await invoke('auth_logout').catch(() => {});
+    setSession(null);
+  };
+
+  const handleSaveAndSignOut = async () => {
+    try {
+      await invoke('save_config', {
+        config: { wtfPath, characters: toConfigCharacters(characters) },
+      });
+      await invoke('append_log', { keyword: 'ACTION', message: 'Saved character list on sign out' });
+      setSavedCharacters(toConfigCharacters(characters));
+    } catch { /* best-effort */ }
+    await handleSignOut();
+  };
+
+  // App state
   const [wtfPath, setWtfPath] = useState('');
   const [characters, setCharacters] = useState<Character[]>([]);
   const [accounts, setAccounts] = useState<AccountInfo[]>([]);
@@ -50,13 +83,11 @@ export default function App() {
     char: Character | null;
   } | null>(null);
 
-  // Ref so the close-event listener always sees the latest isDirty value.
   const isDirtyRef = useRef(isDirty);
   useEffect(() => { isDirtyRef.current = isDirty; }, [isDirty]);
 
   const accountNames = accounts.map(a => a.name);
 
-  // Load config on startup.
   useEffect(() => {
     (async () => {
       try {
@@ -74,8 +105,6 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Intercept window close. In Tauri v2, registering any onCloseRequested listener
-  // means the window will NOT close unless we explicitly call .close() ourselves.
   useEffect(() => {
     let unlisten: (() => void) | undefined;
     const win = getCurrentWindow();
@@ -105,7 +134,6 @@ export default function App() {
     await getCurrentWindow().destroy();
   };
 
-  // Opens the push dialog, but first prompts if there are unsaved changes.
   const requestPush = (addon: Addon | 'all', char: Character | null) => {
     if (isDirty) {
       setPendingPushArgs({ addon, char });
@@ -237,8 +265,17 @@ export default function App() {
     setLastPushStatus(status);
   };
 
+  if (!authChecked) return null;
+  if (!session) return <LoginScreen onLogin={handleLogin} />;
+
   return (
     <div className="app">
+      <AccountMenu
+        session={session}
+        isDirty={isDirty}
+        onSaveAndSignOut={handleSaveAndSignOut}
+        onSignOut={handleSignOut}
+      />
       <WtfFolderInput wtfPath={wtfPath} onApply={handleApply} />
       <PushAllBar onPushAll={addon => requestPush(addon, null)} />
 
@@ -258,7 +295,7 @@ export default function App() {
             onClick={handleRemoveAll}
             disabled={characters.length === 0}
           >
-            <span>✕</span> Remove All
+            <span>&#x2715;</span> Remove All
           </button>
           <button className="btn btn-primary" onClick={handleSave} disabled={!isDirty}>
             Save
@@ -287,7 +324,7 @@ export default function App() {
 
       {errorMessage && (
         <div className="error-banner" onClick={() => setErrorMessage(null)}>
-          ⚠ {errorMessage} — click to dismiss
+          &#9888; {errorMessage} &mdash; click to dismiss
         </div>
       )}
 
