@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { invoke } from '@tauri-apps/api/core';
+import { getCurrentWindow } from '@tauri-apps/api/window';
 import {
   type Addon,
   type AccountInfo,
@@ -15,6 +16,7 @@ import CharactersTable from './components/CharactersTable';
 import AccountCharacterPanels from './components/AccountCharacterPanels';
 import PushDialog from './components/PushDialog';
 import ConfirmDialog from './components/ConfirmDialog';
+import UnsavedChangesDialog from './components/UnsavedChangesDialog';
 import StatusBar from './components/StatusBar';
 import './App.css';
 
@@ -30,7 +32,11 @@ export default function App() {
   const [wtfPath, setWtfPath] = useState('');
   const [characters, setCharacters] = useState<Character[]>([]);
   const [accounts, setAccounts] = useState<AccountInfo[]>([]);
-  const [isDirty, setIsDirty] = useState(false);
+  const [savedCharacters, setSavedCharacters] = useState<ConfigCharacter[]>([]);
+  const isDirty = useMemo(
+    () => JSON.stringify(toConfigCharacters(characters)) !== JSON.stringify(savedCharacters),
+    [characters, savedCharacters],
+  );
   const [lastPushStatus, setLastPushStatus] = useState<string | null>(null);
   const [pushTarget, setPushTarget] = useState<PushTarget | null>(null);
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -38,6 +44,15 @@ export default function App() {
     onConfirm: () => void;
   } | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [pendingPushArgs, setPendingPushArgs] = useState<{
+    addon: Addon | 'all';
+    char: Character | null;
+  } | null>(null);
+
+  // Ref so the close-event listener always sees the latest isDirty value.
+  const isDirtyRef = useRef(isDirty);
+  useEffect(() => { isDirtyRef.current = isDirty; }, [isDirty]);
 
   const accountNames = accounts.map(a => a.name);
 
@@ -48,6 +63,7 @@ export default function App() {
         const config = await invoke<AppConfig>('get_config');
         setWtfPath(config.wtfPath);
         setCharacters(toCharacters(config.characters));
+        setSavedCharacters(config.characters);
         if (config.wtfPath) await scanWtfFolder(config.wtfPath);
         const status = await invoke<string | null>('get_last_push_status');
         setLastPushStatus(status);
@@ -57,6 +73,66 @@ export default function App() {
     })();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Intercept window close. In Tauri v2, registering any onCloseRequested listener
+  // means the window will NOT close unless we explicitly call .close() ourselves.
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    const win = getCurrentWindow();
+    win.onCloseRequested(async (event) => {
+      event.preventDefault();
+      if (isDirtyRef.current) {
+        setShowExitDialog(true);
+      } else {
+        await win.destroy();
+      }
+    }).then(fn => { unlisten = fn; });
+    return () => { unlisten?.(); };
+  }, []);
+
+  const handleSaveAndExit = async () => {
+    try {
+      await invoke('save_config', { config: { wtfPath, characters: toConfigCharacters(characters) } });
+      await invoke('append_log', { keyword: 'ACTION', message: 'Saved character list on exit' });
+      await getCurrentWindow().destroy();
+    } catch (e) {
+      setShowExitDialog(false);
+      setErrorMessage(String(e));
+    }
+  };
+
+  const handleExitWithoutSaving = async () => {
+    await getCurrentWindow().destroy();
+  };
+
+  // Opens the push dialog, but first prompts if there are unsaved changes.
+  const requestPush = (addon: Addon | 'all', char: Character | null) => {
+    if (isDirty) {
+      setPendingPushArgs({ addon, char });
+    } else {
+      openPushDialog(addon, char);
+    }
+  };
+
+  const handleSaveAndContinuePush = async () => {
+    if (!pendingPushArgs) return;
+    try {
+      await invoke('save_config', { config: { wtfPath, characters: toConfigCharacters(characters) } });
+      await invoke('append_log', { keyword: 'ACTION', message: 'Saved character list before push' });
+      setSavedCharacters(toConfigCharacters(characters));
+      openPushDialog(pendingPushArgs.addon, pendingPushArgs.char);
+    } catch (e) {
+      setErrorMessage(String(e));
+    } finally {
+      setPendingPushArgs(null);
+    }
+  };
+
+  const handleContinuePushWithoutSaving = () => {
+    if (!pendingPushArgs) return;
+    openPushDialog(pendingPushArgs.addon, pendingPushArgs.char);
+    setPendingPushArgs(null);
+  };
 
   const scanWtfFolder = async (path: string) => {
     try {
@@ -73,7 +149,7 @@ export default function App() {
       await invoke('save_config', { config: newConfig });
       await invoke('append_log', { keyword: 'ACTION', message: `Set WTF path: ${path}` });
       setWtfPath(path);
-      setIsDirty(false);
+      setSavedCharacters(toConfigCharacters(characters));
       await scanWtfFolder(path);
     } catch (e) {
       setErrorMessage(String(e));
@@ -82,7 +158,6 @@ export default function App() {
 
   const handleUpdateCharacter = (id: string, updates: Partial<Character>) => {
     setCharacters(prev => prev.map(c => (c.id === id ? { ...c, ...updates } : c)));
-    setIsDirty(true);
   };
 
   const handleRemoveCharacter = (id: string) => {
@@ -91,7 +166,6 @@ export default function App() {
       message: `Remove "${char ? `${char.characterName}-${char.realmName}` : 'this character'}" from the list?`,
       onConfirm: () => {
         setCharacters(prev => prev.filter(c => c.id !== id));
-        setIsDirty(true);
         setConfirmDialog(null);
         if (char) {
           invoke('append_log', {
@@ -108,7 +182,6 @@ export default function App() {
       message: 'Remove all characters from the list?',
       onConfirm: () => {
         setCharacters([]);
-        setIsDirty(true);
         setConfirmDialog(null);
         invoke('append_log', { keyword: 'ACTION', message: 'Removed all characters' }).catch(() => {});
       },
@@ -129,7 +202,6 @@ export default function App() {
       enabled: true,
     };
     setCharacters(prev => [...prev, newChar]);
-    setIsDirty(true);
     invoke('append_log', {
       keyword: 'ACTION',
       message: `Added character ${char.name}-${char.realm}-${account}`,
@@ -142,7 +214,7 @@ export default function App() {
         config: { wtfPath, characters: toConfigCharacters(characters) },
       });
       await invoke('append_log', { keyword: 'ACTION', message: 'Saved character list' });
-      setIsDirty(false);
+      setSavedCharacters(toConfigCharacters(characters));
     } catch (e) {
       setErrorMessage(String(e));
     }
@@ -168,7 +240,7 @@ export default function App() {
   return (
     <div className="app">
       <WtfFolderInput wtfPath={wtfPath} onApply={handleApply} />
-      <PushAllBar onPushAll={addon => openPushDialog(addon, null)} />
+      <PushAllBar onPushAll={addon => requestPush(addon, null)} />
 
       <div className="table-section">
         <div className="table-scroll">
@@ -177,7 +249,7 @@ export default function App() {
             accounts={accountNames}
             onUpdate={handleUpdateCharacter}
             onRemove={handleRemoveCharacter}
-            onPush={(char, addon) => openPushDialog(addon, char)}
+            onPush={(char, addon) => requestPush(addon, char)}
           />
         </div>
         <div className="table-footer">
@@ -217,6 +289,28 @@ export default function App() {
         <div className="error-banner" onClick={() => setErrorMessage(null)}>
           ⚠ {errorMessage} — click to dismiss
         </div>
+      )}
+
+      {showExitDialog && (
+        <UnsavedChangesDialog
+          title="You have unsaved changes. What would you like to do?"
+          primaryLabel="Save and Exit"
+          secondaryLabel="Exit Without Saving"
+          onPrimary={handleSaveAndExit}
+          onSecondary={handleExitWithoutSaving}
+          onCancel={() => setShowExitDialog(false)}
+        />
+      )}
+
+      {pendingPushArgs && (
+        <UnsavedChangesDialog
+          title="You have unsaved changes. What would you like to do?"
+          primaryLabel="Save and Continue"
+          secondaryLabel="Continue Without Saving"
+          onPrimary={handleSaveAndContinuePush}
+          onSecondary={handleContinuePushWithoutSaving}
+          onCancel={() => setPendingPushArgs(null)}
+        />
       )}
     </div>
   );

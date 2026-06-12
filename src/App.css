@@ -468,6 +468,17 @@ body {
 
 .confirm-dialog { max-width: 360px; }
 
+.unsaved-dialog { max-width: 420px; }
+
+.unsaved-dialog-footer {
+  justify-content: space-between;
+}
+
+.unsaved-dialog-actions {
+  display: flex;
+  gap: 8px;
+}
+
 .dialog-message { font-size: 13px; line-height: 1.5; }
 
 .dialog-footer {
