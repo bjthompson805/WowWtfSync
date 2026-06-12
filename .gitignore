@@ -1,6 +1,7 @@
-build/
-release/
-imgui.ini
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+.env
 LuaApp/lua_modules/printTableC.so
-LuaApp/lua_modules/printTableC.dll
-*.DS_Store
+LuaApp/lua_modules/Release/
