@@ -45,7 +45,8 @@ export interface AccountInfo {
 
 /** What the PushDialog needs to open. */
 export interface PushTarget {
-  addon: Addon;
+  /** A specific addon name, or 'all' to push every addon. */
+  addon: Addon | 'all';
   /** 'CharacterName-RealmName-Account' or 'all' */
   character: string;
   /** Human-readable label for the dialog header. */

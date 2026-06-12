@@ -89,6 +89,20 @@ body {
   font-size: 11px;
 }
 
+.btn-push-all-all {
+  border-color: var(--accent-h);
+  font-weight: 700;
+}
+
+.push-all-separator {
+  display: inline-block;
+  width: 1px;
+  height: 18px;
+  background: var(--border-2);
+  margin: 0 4px;
+  vertical-align: middle;
+}
+
 /* ── WTF folder row ────────────────────────────────────────────────────────── */
 .wtf-folder-row {
   display: flex;
@@ -149,6 +163,7 @@ body {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-gutter: stable;
 }
 
 .table-footer {
@@ -175,9 +190,6 @@ body {
 }
 
 .characters-table thead {
-  position: sticky;
-  top: 0;
-  z-index: 2;
   background: var(--bg-3);
 }
 
@@ -186,7 +198,9 @@ body {
   border-bottom: 2px solid var(--border-2);
   border-right: 1px solid var(--border);
   background: var(--bg-3);
-  position: relative;
+  position: sticky;
+  top: 0;
+  z-index: 2;
   user-select: none;
 }
 .characters-table th:last-child { border-right: none; }
@@ -235,6 +249,10 @@ body {
 .characters-table tbody tr:nth-child(even):hover { background: var(--row-hover); }
 
 .td-actions {
+  vertical-align: middle;
+}
+
+.td-actions-inner {
   display: flex;
   align-items: center;
   gap: 3px;
@@ -328,6 +346,12 @@ body {
   color: var(--text);
 }
 .context-menu-item:hover { background: var(--selected-bg); }
+
+.context-menu-separator {
+  height: 1px;
+  background: var(--border);
+  margin: 3px 0;
+}
 
 /* ── Browser panels ────────────────────────────────────────────────────────── */
 .browser-section {
@@ -472,11 +496,7 @@ body {
 .push-dialog-warning {
   font-size: 12px;
   line-height: 1.5;
-  color: #e8b84b;
-  background: rgba(232, 184, 75, 0.08);
-  border-left: 3px solid #e8b84b;
-  padding: 6px 10px;
-  border-radius: 0 3px 3px 0;
+  color: var(--text);
 }
 
 .push-dialog-note {

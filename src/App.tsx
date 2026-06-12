@@ -148,7 +148,7 @@ export default function App() {
     }
   };
 
-  const openPushDialog = (addon: Addon, char: Character | null) => {
+  const openPushDialog = (addon: Addon | 'all', char: Character | null) => {
     if (char) {
       setPushTarget({
         addon,

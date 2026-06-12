@@ -12,15 +12,21 @@ type Phase = 'confirm' | 'pushing' | 'done' | 'error';
 
 function buildDescription(target: PushTarget): string {
   const { addon, character, displayName } = target;
-  const isAll = character === 'all';
+  const isAllChars = character === 'all';
+
+  if (addon === 'all') {
+    return isAllChars
+      ? 'Push all addon data from each character to all accounts that are not the same as the character\'s account.'
+      : `Push all addon data for ${displayName} to all accounts that are not the same as the character's account.`;
+  }
 
   if (addon === 'Altoholic') {
-    return isAll
+    return isAllChars
       ? 'Push Altoholic data from all accounts, combining the data.'
       : `Push Altoholic data for ${displayName} by combining the data to/from all accounts.`;
   }
 
-  const who = isAll ? 'each character' : displayName;
+  const who = isAllChars ? 'each character' : displayName;
   const addonDesc = ADDON_DESCRIPTIONS[addon] ?? '';
   return `Push ${addon} data from ${who} to all accounts that are not the same as the character's account. ${addonDesc}`;
 }
@@ -32,6 +38,7 @@ export default function PushDialog({ target, onClose, onPushComplete }: Props) {
   const isAll = character === 'all';
 
   const headerLabel = isAll ? 'All Characters' : displayName;
+  const addonLabel = addon === 'all' ? 'All Addons' : addon;
   const description = buildDescription(target);
 
   const handlePush = async () => {
@@ -53,7 +60,7 @@ export default function PushDialog({ target, onClose, onPushComplete }: Props) {
     <div className="dialog-backdrop">
       <div className="dialog push-dialog">
         <h2 className="push-dialog-header">
-          Push {addon} — {headerLabel}
+          Push {addonLabel} — {headerLabel}
         </h2>
 
         {(phase === 'confirm' || phase === 'pushing') && (

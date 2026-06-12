@@ -222,7 +222,7 @@ fn find_lua_exe() -> Result<String, String> {
         }
     }
     Err(
-        "Lua 5.4 not found. Please install Lua 5.4 and make sure it is on your PATH."
+        "Lua 5.4+ not found. Please install Lua 5.4 or higher and make sure it is in your PATH."
             .to_string(),
     )
 }

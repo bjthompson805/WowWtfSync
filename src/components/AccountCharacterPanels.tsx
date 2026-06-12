@@ -55,7 +55,9 @@ export default function AccountCharacterPanels({ accounts, onAdd }: Props) {
             ) : currentAccount.characters.length === 0 ? (
               <div className="panel-empty">No characters found in this account.</div>
             ) : (
-              currentAccount.characters.map(char => {
+              [...currentAccount.characters]
+                .sort((a, b) => `${a.name}-${a.realm}`.localeCompare(`${b.name}-${b.realm}`))
+                .map(char => {
                 const key = `${char.name}-${char.realm}`;
                 const isSelected =
                   selectedChar?.name === char.name && selectedChar?.realm === char.realm;

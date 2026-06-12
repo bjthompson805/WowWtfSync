@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { X, ArrowUp, ArrowUpDown, ArrowUpNarrowWide, ArrowDownNarrowWide } from 'lucide-react';
 import { ADDONS, type Addon, type Character, type Faction } from '../types';
 
+type AddonOrAll = Addon | 'all';
+
 interface Props {
   characters: Character[];
   accounts: string[];
   onUpdate: (id: string, updates: Partial<Character>) => void;
   onRemove: (id: string) => void;
-  onPush: (character: Character, addon: Addon) => void;
+  onPush: (character: Character, addon: AddonOrAll) => void;
 }
 
 type SortDir = 'asc' | 'desc';
@@ -38,10 +40,12 @@ export default function CharactersTable({
     y: number;
   } | null>(null);
 
+  const tableRef = useRef<HTMLTableElement>(null);
   const resizeRef = useRef<{
     col: number;
     startX: number;
     startWidths: number[];
+    scale: number;
   } | null>(null);
 
   // Close context menu on outside click.
@@ -55,8 +59,8 @@ export default function CharactersTable({
   useEffect(() => {
     const onMouseMove = (e: MouseEvent) => {
       if (!resizeRef.current) return;
-      const { col, startX, startWidths } = resizeRef.current;
-      const delta = e.clientX - startX;
+      const { col, startX, startWidths, scale } = resizeRef.current;
+      const delta = (e.clientX - startX) / scale;
       const next = col + 1;
 
       const newCurrent = Math.max(startWidths[col] + delta, MIN_WIDTHS[col]);
@@ -87,7 +91,10 @@ export default function CharactersTable({
 
   const startResize = (col: number, e: React.MouseEvent) => {
     e.preventDefault();
-    resizeRef.current = { col, startX: e.clientX, startWidths: [...widths] };
+    const tableWidth = tableRef.current?.offsetWidth ?? widths.reduce((a, b) => a + b, 0);
+    const totalPixelWidth = widths.reduce((a, b) => a + b, 0);
+    const scale = tableWidth / totalPixelWidth;
+    resizeRef.current = { col, startX: e.clientX, startWidths: [...widths], scale };
     document.body.style.cursor = 'col-resize';
     document.body.style.userSelect = 'none';
   };
@@ -126,39 +133,34 @@ export default function CharactersTable({
     setContextMenu({ charId: char.id, x: rect.left, y: rect.bottom + 4 });
   };
 
-  const handleContextAddon = (addon: Addon) => {
+  const handleContextAddon = (addon: AddonOrAll) => {
     if (!contextMenu) return;
     const char = characters.find(c => c.id === contextMenu.charId);
     if (char) onPush(char, addon);
     setContextMenu(null);
   };
 
-  const colStyle = (i: number): React.CSSProperties => ({
-    width: widths[i],
-    minWidth: widths[i],
-    maxWidth: widths[i],
-  });
-
   return (
     <div className="characters-table-wrapper">
-      <table className="characters-table">
+      <table className="characters-table" ref={tableRef}>
         <colgroup>
           {widths.map((w, i) => <col key={i} style={{ width: w }} />)}
         </colgroup>
         <thead>
           <tr>
-            <th style={colStyle(COL_ACTIONS)} className="th-actions" />
+            <th className="th-actions" />
             {(['character', 'account', 'faction', 'enabled'] as SortCol[]).map((col, idx) => {
               const colIdx = idx + 1;
               const label = col.charAt(0).toUpperCase() + col.slice(1);
-              const isLast = colIdx === COL_ENABLED;
+              // Only Character (1) and Account (2) have resize handles.
+              const hasResizeHandle = colIdx === COL_CHARACTER || colIdx === COL_ACCOUNT;
               return (
-                <th key={col} style={colStyle(colIdx)} className="th-sortable">
+                <th key={col} className="th-sortable">
                   <span className="th-content" onClick={() => handleSortClick(col)}>
                     {label}
                     <SortIcon col={col} />
                   </span>
-                  {!isLast && (
+                  {hasResizeHandle && (
                     <span
                       className="resize-handle"
                       onMouseDown={e => startResize(colIdx, e)}
@@ -173,37 +175,41 @@ export default function CharactersTable({
           {sortedChars.length === 0 ? (
             <tr>
               <td colSpan={5} className="table-empty">
-                No characters added yet. Select a character below and click Add.
+                No characters added yet. To get started:
+                {' '}enter the path to your WoW <strong>WTF</strong> folder above and click <strong>Apply</strong>,
+                {' '}then select an account on the left below, click a character on the right, and click <strong>Add</strong>.
               </td>
             </tr>
           ) : (
             sortedChars.map(char => (
               <tr key={char.id}>
                 {/* Action buttons */}
-                <td style={colStyle(COL_ACTIONS)} className="td-actions">
-                  <button
-                    className="action-btn remove-btn"
-                    title="Remove character"
-                    onClick={() => onRemove(char.id)}
-                  >
-                    <X size={12} />
-                  </button>
-                  <button
-                    className="action-btn push-btn"
-                    title="Push this character's addon data"
-                    onClick={e => handlePushButtonClick(char, e)}
-                  >
-                    <ArrowUp size={12} />
-                  </button>
+                <td className="td-actions">
+                  <span className="td-actions-inner">
+                    <button
+                      className="action-btn remove-btn"
+                      title="Remove character"
+                      onClick={() => onRemove(char.id)}
+                    >
+                      <X size={12} />
+                    </button>
+                    <button
+                      className="action-btn push-btn"
+                      title="Push this character's addon data"
+                      onClick={e => handlePushButtonClick(char, e)}
+                    >
+                      <ArrowUp size={12} />
+                    </button>
+                  </span>
                 </td>
 
                 {/* Character name */}
-                <td style={colStyle(COL_CHARACTER)} className="td-text">
+                <td className="td-text">
                   {char.characterName}-{char.realmName}
                 </td>
 
                 {/* Account dropdown */}
-                <td style={colStyle(COL_ACCOUNT)} className="td-select">
+                <td className="td-select">
                   <select
                     value={char.account}
                     onChange={e => onUpdate(char.id, { account: e.target.value })}
@@ -219,7 +225,7 @@ export default function CharactersTable({
                 </td>
 
                 {/* Faction dropdown */}
-                <td style={colStyle(COL_FACTION)} className="td-select">
+                <td className="td-select">
                   <select
                     value={char.faction}
                     onChange={e => onUpdate(char.id, { faction: e.target.value as Faction })}
@@ -230,7 +236,7 @@ export default function CharactersTable({
                 </td>
 
                 {/* Enabled checkbox */}
-                <td style={colStyle(COL_ENABLED)} className="td-center">
+                <td className="td-center">
                   <input
                     type="checkbox"
                     checked={char.enabled}
@@ -250,6 +256,11 @@ export default function CharactersTable({
           style={{ top: contextMenu.y, left: contextMenu.x }}
           onClick={e => e.stopPropagation()}
         >
+          <div className="context-menu-item" onClick={() => handleContextAddon('all')}>
+            <ArrowUp size={12} />
+            ALL
+          </div>
+          <div className="context-menu-separator" />
           {ADDONS.map(addon => (
             <div
               key={addon}
