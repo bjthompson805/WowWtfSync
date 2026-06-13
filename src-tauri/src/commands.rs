@@ -298,6 +298,6 @@ pub fn get_last_push_status(app: AppHandle) -> Result<Option<String>, String> {
 }
 
 #[tauri::command]
-pub fn open_url(app: AppHandle, url: String) -> Result<(), String> {
+pub fn open_url(_app: AppHandle, url: String) -> Result<(), String> {
     tauri_plugin_opener::open_url(url, None::<&str>).map_err(|e| e.to_string())
 }
