@@ -262,6 +262,39 @@ fn find_lua_exe() -> Result<String, String> {
         }
     }
 
+    // On macOS/Linux, probe absolute paths first. Bundled .app processes launch
+    // with a stripped PATH that omits /opt/homebrew/bin and /usr/local/bin, so
+    // bare-name lookups fail even when Lua is installed in the normal location.
+    #[cfg(not(target_os = "windows"))]
+    {
+        let name_stems: Vec<String> = {
+            let mut v = vec!["lua".to_string()];
+            for minor in (4..=9).rev() {
+                v.push(format!("lua5.{}", minor));
+                v.push(format!("lua5{}", minor));
+                v.push(format!("lua-5.{}", minor));
+            }
+            v
+        };
+
+        // Directories where Lua is commonly installed outside the default PATH.
+        let search_dirs = [
+            "/opt/homebrew/bin",  // Homebrew on Apple Silicon
+            "/usr/local/bin",     // Homebrew on Intel / manual installs
+            "/usr/bin",
+            "/bin",
+        ];
+
+        for dir in &search_dirs {
+            for stem in &name_stems {
+                let path = format!("{}/{}", dir, stem);
+                if std::path::Path::new(&path).exists() {
+                    return Ok(path);
+                }
+            }
+        }
+    }
+
     // Fall back to the system PATH. Try the generic "lua" name first (most package
     // managers provide it as a symlink to the installed version), then versioned names
     // covering Lua 5.4 through 5.9 so future minor releases are picked up automatically.

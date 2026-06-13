@@ -34,10 +34,10 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "resources": [
-      "../THIRD_PARTY_LICENSES.txt",
-      "../push.lua",
-      "../LuaApp/**/*"
-    ]
+    "resources": {
+      "../THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt",
+      "../push.lua": "push.lua",
+      "../LuaApp": "LuaApp"
+    }
   }
 }
