@@ -187,26 +187,48 @@ pub fn run_push(
 }
 
 fn find_push_lua(app: &AppHandle) -> Result<PathBuf, String> {
-    // In production the resource dir holds push.lua next to the exe.
-    if let Ok(resource_dir) = app.path().resource_dir() {
-        let candidate = resource_dir.join("push.lua");
-        if candidate.exists() {
-            return Ok(candidate);
-        }
-    }
-    // Dev fallback: look relative to the cargo manifest directory.
+    let mut tried: Vec<String> = Vec::new();
+
+    // Primary: walk up from the executable directory.
+    // current_exe() returns an absolute path, so every candidate is absolute —
+    // no canonicalize() needed (and canonicalize adds \\?\ on Windows which
+    // Lua's fopen cannot open).
     if let Ok(exe) = std::env::current_exe() {
-        // Walk up from target/debug/ to find push.lua in the workspace root.
         let mut dir = exe.parent().map(|p| p.to_path_buf());
         while let Some(d) = dir {
-            let candidate = d.join("push.lua");
-            if candidate.exists() {
-                return Ok(candidate);
+            // Skip non-absolute directories as a safety guard.
+            if d.is_absolute() {
+                let candidate = d.join("push.lua");
+                tried.push(candidate.display().to_string());
+                if candidate.exists() {
+                    return Ok(candidate);
+                }
             }
             dir = d.parent().map(|p| p.to_path_buf());
         }
     }
-    Err("Could not find push.lua. Make sure it is located next to the executable.".to_string())
+
+    // Fallback: Tauri resource dir (for unusual bundled layouts where
+    // push.lua is not placed next to the executable).
+    if let Ok(resource_dir) = app.path().resource_dir() {
+        if resource_dir.is_absolute() {
+            let candidate = resource_dir.join("push.lua");
+            tried.push(candidate.display().to_string());
+            if candidate.exists() {
+                return Ok(candidate);
+            }
+        } else {
+            tried.push(format!(
+                "[skipped non-absolute resource_dir: {}]",
+                resource_dir.display()
+            ));
+        }
+    }
+
+    Err(format!(
+        "Could not find push.lua. Locations tried:\n{}",
+        tried.join("\n")
+    ))
 }
 
 fn find_lua_exe() -> Result<String, String> {
