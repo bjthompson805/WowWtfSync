@@ -14,7 +14,7 @@ export default defineConfig({
       ? { protocol: "ws", host, port: 1421 }
       : undefined,
     watch: {
-      ignored: ["**/src-tauri/**"],
+      ignored: ["**/src-tauri/**", "**/LuaApp/**", "**/push.lua"],
     },
   },
 });

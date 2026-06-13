@@ -210,35 +210,59 @@ fn find_push_lua(app: &AppHandle) -> Result<PathBuf, String> {
 }
 
 fn find_lua_exe() -> Result<String, String> {
-    // On Windows, check for a bundled lua/ directory next to the executable first.
+    // On Windows, scan the bundled lua/ directory next to the executable for any lua*.exe.
+    // This works regardless of which Lua 5.x minor version is installed.
     #[cfg(target_os = "windows")]
     if let Ok(exe) = std::env::current_exe() {
         if let Some(exe_dir) = exe.parent() {
-            let lua_dir = exe_dir.join("lua");
-            for name in &["lua54.exe", "lua55.exe", "lua-5.4.exe", "lua-5.5.exe", "lua.exe"] {
-                let candidate = lua_dir.join(name);
-                if candidate.exists() {
-                    return Ok(candidate.to_string_lossy().into_owned());
-                }
+            if let Some(path) = find_lua_exe_in_dir(&exe_dir.join("lua")) {
+                return Ok(path);
             }
         }
     }
 
-    // Fall back to common Lua 5.4 executable names on PATH.
-    let candidates = ["lua5.4", "lua55", "lua54", "lua-5.4", "lua-5.5", "lua"];
+    // Fall back to the system PATH. Try the generic "lua" name first (most package
+    // managers provide it as a symlink to the installed version), then versioned names
+    // covering Lua 5.4 through 5.9 so future minor releases are picked up automatically.
+    let mut candidates: Vec<String> = vec!["lua".to_string()];
+    for minor in (4..=9).rev() {
+        candidates.push(format!("lua5.{}", minor));
+        candidates.push(format!("lua5{}", minor));
+        candidates.push(format!("lua-5.{}", minor));
+    }
+
     for candidate in &candidates {
         if std::process::Command::new(candidate)
             .arg("-v")
             .output()
             .is_ok()
         {
-            return Ok(candidate.to_string());
+            return Ok(candidate.clone());
         }
     }
-    Err(
-        "Lua 5.4+ not found. Please install Lua 5.4 or higher and make sure it is in your PATH."
-            .to_string(),
-    )
+
+    Err("Lua not found. Please install Lua (5.4 or later) and make sure it is in your PATH."
+        .to_string())
+}
+
+/// Scans `dir` for the first executable whose name starts with "lua" (case-insensitive).
+/// Used on Windows to find whichever lua*.exe was bundled, without hardcoding a version.
+#[cfg(target_os = "windows")]
+fn find_lua_exe_in_dir(dir: &std::path::Path) -> Option<String> {
+    let entries = std::fs::read_dir(dir).ok()?;
+    let mut candidates: Vec<std::path::PathBuf> = entries
+        .flatten()
+        .filter(|e| {
+            let name = e.file_name();
+            let lower = name.to_string_lossy().to_ascii_lowercase();
+            lower.starts_with("lua") && lower.ends_with(".exe")
+        })
+        .map(|e| e.path())
+        .collect();
+    // Sort so the result is deterministic; prefer the lexicographically last name
+    // (e.g. lua55.exe > lua54.exe, so we pick the newer one if both are present)
+    candidates.sort();
+    candidates.pop().map(|p| p.to_string_lossy().into_owned())
 }
 
 #[tauri::command]

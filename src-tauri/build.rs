@@ -48,56 +48,194 @@ fn compile_windows(workspace: &Path, c_src: &Path) {
 
     let lua_dir = PathBuf::from(r"C:\lua");
 
-    // Headers may be directly in C:\lua or in C:\lua\include
-    let include_dir = if lua_dir.join("include").join("lua.h").exists() {
-        lua_dir.join("include")
-    } else {
-        lua_dir.clone()
-    };
+    // Search for lua.h in the locations a C:\lua install might place it:
+    //   C:\lua\include\  (pre-built dev package layout)
+    //   C:\lua\          (headers copied directly)
+    //   C:\lua\src\      (Lua source tarball extracted into C:\lua)
+    let include_dir = [
+        lua_dir.join("include"),
+        lua_dir.clone(),
+        lua_dir.join("src"),
+    ]
+    .into_iter()
+    .find(|p| p.join("lua.h").exists())
+    .unwrap_or_else(|| {
+        panic!(
+            "lua.h not found in C:\\lua, C:\\lua\\include, or C:\\lua\\src. \
+             Copy the Lua source files (lua.h, luaconf.h, lauxlib.h, lualib.h) \
+             into one of those directories."
+        )
+    });
 
-    // Use cc crate to locate and invoke the system C compiler with the right environment
-    // (cc handles finding MSVC via the registry, setting up env vars, etc.)
+    // Find whichever lua*.dll is present (e.g. lua54.dll, lua55.dll)
+    let lua_dll = find_file_by_prefix(&lua_dir, "lua", "dll").unwrap_or_else(|| {
+        panic!("No lua*.dll found in {}", lua_dir.display())
+    });
+    let link_name = lua_dll.file_stem().unwrap().to_string_lossy().into_owned();
+
+    // Prefer GCC/MinGW: it can link directly against the .dll with no .lib needed.
+    let gcc_ok = std::process::Command::new("gcc")
+        .args([
+            "-shared",
+            "-o", output_dll.to_str().unwrap(),
+            &format!("-I{}", include_dir.display()),
+            c_src.to_str().unwrap(),
+            &format!("-L{}", lua_dir.display()),
+            &format!("-l{}", link_name),
+        ])
+        .status()
+        .map(|s| s.success())
+        .unwrap_or(false);
+
+    if gcc_ok {
+        return;
+    }
+
+    // Fall back to MSVC. It needs an import .lib, so we generate one on-the-fly
+    // from the DLL's exports using dumpbin + lib (both ship with MSVC Build Tools).
     let compiler = cc::Build::new().get_compiler();
+    let import_lib = generate_msvc_import_lib(&compiler, &lua_dll, &output_dir);
 
-    let status = if compiler.is_like_msvc() {
-        // MSVC: /LD creates a DLL; run from output_dir so .obj/.exp/.lib land there
-        let lib_path = lua_dir.join("lua54.lib");
-        assert!(
-            lib_path.exists(),
-            "lua54.lib not found at {} — needed for MSVC DLL link",
-            lib_path.display()
-        );
-        compiler
-            .to_command()
-            .current_dir(&output_dir)
-            .args([
-                "/nologo",
-                "/LD",
-                &format!("/I{}", include_dir.display()),
-                c_src.to_str().unwrap(),
-                "/FeprintTableC.dll",
-                lib_path.to_str().unwrap(),
-            ])
-            .status()
-            .expect("Failed to run cl.exe for printTableC.dll")
-    } else {
-        // MinGW / GCC — links directly against lua54.dll
-        compiler
-            .to_command()
-            .args([
-                "-shared",
-                "-o",
-                output_dll.to_str().unwrap(),
-                &format!("-I{}", include_dir.display()),
-                c_src.to_str().unwrap(),
-                &format!("-L{}", lua_dir.display()),
-                "-llua54",
-            ])
-            .status()
-            .expect("Failed to run gcc for printTableC.dll")
-    };
+    let status = compiler
+        .to_command()
+        .current_dir(&output_dir)
+        .args([
+            "/nologo",
+            "/LD",
+            &format!("/I{}", include_dir.display()),
+            c_src.to_str().unwrap(),
+            "/FeprintTableC.dll",
+            import_lib.to_str().unwrap(),
+        ])
+        .status()
+        .expect("Failed to run cl.exe for printTableC.dll");
 
     assert!(status.success(), "printTableC.dll compilation failed");
+}
+
+/// Generates a MSVC import lib (.lib) from a DLL by reading its exports with
+/// dumpbin, writing a .def file, and running lib.exe — no pre-existing .lib needed.
+fn generate_msvc_import_lib(compiler: &cc::Tool, dll_path: &Path, out_dir: &Path) -> PathBuf {
+    let dll_stem = dll_path.file_stem().unwrap().to_string_lossy();
+    let lib_path = out_dir.join(format!("{}.lib", dll_stem));
+    // Do not cache: always regenerate so a stale lib from a previous failed
+    // build never silently produces unresolved-symbol errors.
+
+    // dumpbin and lib.exe live in the same MSVC toolchain directory as cl.exe.
+    // Apply the cc-provided environment so they appear on PATH.
+    let env: Vec<_> = compiler.env().to_vec();
+
+    let dumpbin_out = {
+        let mut cmd = std::process::Command::new("dumpbin");
+        for (k, v) in &env {
+            cmd.env(k, v);
+        }
+        cmd.args(["/EXPORTS", "/NOLOGO", dll_path.to_str().unwrap()])
+            .output()
+            .expect("dumpbin not found — ensure MSVC Build Tools are installed")
+    };
+    assert!(
+        dumpbin_out.status.success(),
+        "dumpbin /EXPORTS failed for {}",
+        dll_path.display()
+    );
+
+    // Pass the full filename (e.g. "lua54.dll") so the LIBRARY directive in the
+    // .def file exactly matches the DLL name the linker will look for at runtime.
+    let dll_filename = dll_path.file_name().unwrap().to_string_lossy();
+    let def_content = dumpbin_to_def(&dll_filename, &String::from_utf8_lossy(&dumpbin_out.stdout));
+    let def_path = out_dir.join(format!("{}.def", dll_stem));
+    fs::write(&def_path, def_content).expect("Failed to write .def file");
+
+    let lib_status = {
+        let mut cmd = std::process::Command::new("lib");
+        for (k, v) in &env {
+            cmd.env(k, v);
+        }
+        cmd.args([
+            "/NOLOGO",
+            "/MACHINE:X64",
+            &format!("/DEF:{}", def_path.display()),
+            &format!("/OUT:{}", lib_path.display()),
+        ])
+        .status()
+        .expect("lib.exe not found — ensure MSVC Build Tools are installed")
+    };
+    assert!(
+        lib_status.success(),
+        "lib.exe failed to generate import lib from {}",
+        dll_path.display()
+    );
+
+    lib_path
+}
+
+/// Parses `dumpbin /EXPORTS` output into a MSVC .def file.
+///
+/// dumpbin output looks like:
+///
+///     ordinal hint RVA      name
+///                                   ← blank line here, before any data
+///           1    0 000053B0 lua_absindex
+///           2    1 0000D7F0 lua_arith
+///           ...
+///                                   ← blank line after last entry
+///   Summary
+fn dumpbin_to_def(dll_filename: &str, output: &str) -> String {
+    let mut def = format!("LIBRARY {}\nEXPORTS\n", dll_filename);
+    let mut in_exports = false;
+    let mut saw_data = false;
+
+    for line in output.lines() {
+        let trimmed = line.trim();
+
+        if !in_exports {
+            // Header line: "ordinal hint RVA name"
+            if trimmed.starts_with("ordinal") && trimmed.contains("name") {
+                in_exports = true;
+            }
+            continue;
+        }
+
+        if trimmed.is_empty() {
+            // There is always one blank line between the header and the first entry.
+            // Only treat a blank line as end-of-table once we have seen real data.
+            if saw_data {
+                break;
+            }
+            continue;
+        }
+
+        // Each export line: ordinal  hint  RVA  name  [= forwarded]
+        let cols: Vec<&str> = trimmed.split_whitespace().collect();
+        if cols.len() >= 4 && !cols[3].contains('=') {
+            def.push_str(cols[3]);
+            def.push('\n');
+            saw_data = true;
+        }
+    }
+
+    def
+}
+
+/// Finds the first file in `dir` whose lowercase name starts with `prefix` and ends with `.ext`.
+fn find_file_by_prefix(dir: &Path, prefix: &str, ext: &str) -> Option<PathBuf> {
+    let entries = fs::read_dir(dir).ok()?;
+    let mut matches: Vec<PathBuf> = entries
+        .flatten()
+        .filter_map(|e| {
+            let name = e.file_name();
+            let lower = name.to_string_lossy().to_ascii_lowercase();
+            if lower.starts_with(prefix) && lower.ends_with(&format!(".{}", ext)) {
+                Some(e.path())
+            } else {
+                None
+            }
+        })
+        .collect();
+    // Sort so results are deterministic; pick the last (highest version lexicographically)
+    matches.sort();
+    matches.pop()
 }
 
 // ── Unix: compile printTableC.c → LuaApp/lua_modules/printTableC.so ──
@@ -107,10 +245,14 @@ fn compile_unix(workspace: &Path, c_src: &Path, target_os: &str) {
     fs::create_dir_all(&output_dir).expect("Failed to create LuaApp/lua_modules");
     let output_so = output_dir.join("printTableC.so");
 
-    let lua_cflags = lua_include_flags();
-
+    // Check for vendored headers first so the build works without a system Lua dev package.
+    let vendored = workspace.join("LuaApp/lua_src");
+    let lua_cflags = if vendored.join("lua.h").exists() {
+        vec![format!("-I{}", vendored.display())]
+    } else {
+        lua_include_flags()
+    };
     let compiler = cc::Build::new().get_compiler();
-
     let mut args: Vec<String> = Vec::new();
 
     if target_os == "macos" {
@@ -138,32 +280,75 @@ fn compile_unix(workspace: &Path, c_src: &Path, target_os: &str) {
     assert!(status.success(), "printTableC.so compilation failed");
 }
 
-/// Returns -I flags for Lua headers via pkg-config, falling back to common paths.
+/// Returns -I flags for Lua headers.
+/// Tries pkg-config across all Lua 5.x minor versions (present and future),
+/// then falls back to scanning common filesystem paths.
 fn lua_include_flags() -> Vec<String> {
-    for name in &["lua5.4", "lua-5.4", "lua54", "lua"] {
+    // Try pkg-config with versioned and generic names.
+    // Generate names for Lua 5.4 through 5.9 so future minor releases are covered.
+    let mut pkg_names: Vec<String> = Vec::new();
+    for minor in (4..=9).rev() {
+        pkg_names.push(format!("lua5.{}", minor));
+        pkg_names.push(format!("lua-5.{}", minor));
+        pkg_names.push(format!("lua5{}", minor));
+    }
+    pkg_names.extend(["lua5".into(), "lua".into()]);
+
+    for name in &pkg_names {
         if let Ok(out) = std::process::Command::new("pkg-config")
             .args(["--cflags", name])
             .output()
         {
             if out.status.success() {
                 let s = String::from_utf8_lossy(&out.stdout);
-                return s.split_whitespace().map(|s| s.to_string()).collect();
+                let flags: Vec<String> = s.split_whitespace().map(str::to_string).collect();
+                if !flags.is_empty() {
+                    return flags;
+                }
             }
         }
     }
-    // Fallback: common Lua header locations
-    for path in &[
-        "/usr/include/lua5.4",
-        "/usr/local/include/lua5.4",
-        "/usr/include/lua",
-        "/usr/local/include",
+
+    // Fallback: scan common include roots for any lua* subdirectory containing lua.h
+    let search_roots = [
         "/usr/include",
-    ] {
-        if Path::new(path).join("lua.h").exists() {
-            return vec![format!("-I{}", path)];
+        "/usr/local/include",
+        "/opt/local/include",       // MacPorts
+        "/opt/homebrew/include",    // Homebrew (Apple Silicon)
+        "/usr/local/opt/lua/include", // Homebrew (Intel)
+    ];
+
+    for root in &search_roots {
+        let root_path = Path::new(root);
+
+        // lua.h directly in the root (e.g. /usr/local/include/lua.h)
+        if root_path.join("lua.h").exists() {
+            return vec![format!("-I{}", root)];
+        }
+
+        // Any lua* subdirectory containing lua.h (e.g. /usr/include/lua5.4/, /usr/include/lua/)
+        if let Ok(entries) = fs::read_dir(root_path) {
+            let mut candidates: Vec<PathBuf> = entries
+                .flatten()
+                .filter(|e| {
+                    e.file_type().map(|t| t.is_dir()).unwrap_or(false)
+                        && e.file_name()
+                            .to_string_lossy()
+                            .to_ascii_lowercase()
+                            .starts_with("lua")
+                        && e.path().join("lua.h").exists()
+                })
+                .map(|e| e.path())
+                .collect();
+            // Sort and prefer the lexicographically last (typically newest version)
+            candidates.sort();
+            if let Some(dir) = candidates.pop() {
+                return vec![format!("-I{}", dir.display())];
+            }
         }
     }
-    // Last resort: hope it's on the default include path
+
+    // Last resort: hope lua.h is on the compiler's default search path
     vec![]
 }
 
