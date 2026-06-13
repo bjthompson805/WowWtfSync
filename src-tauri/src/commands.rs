@@ -169,11 +169,22 @@ pub fn run_push(
     let push_lua = find_push_lua(&app)?;
     let lua_exe = find_lua_exe()?;
 
-    let output = std::process::Command::new(&lua_exe)
-        .arg(&push_lua)
+    let mut cmd = std::process::Command::new(&lua_exe);
+    cmd.arg(&push_lua)
         .arg(&addon)
         .arg(&cfg_path_str)
-        .arg(&character)
+        .arg(&character);
+
+    // On Windows, a GUI app spawning a console binary (lua.exe) would normally
+    // open a new console window that flashes and steals focus.  CREATE_NO_WINDOW
+    // suppresses it entirely without affecting stdout/stderr capture.
+    #[cfg(target_os = "windows")]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+    }
+
+    let output = cmd
         .output()
         .map_err(|e| format!("Failed to launch Lua: {}", e))?;
 

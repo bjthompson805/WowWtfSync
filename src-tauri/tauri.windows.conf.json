@@ -4,7 +4,8 @@
     "resources": {
       "../THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt",
       "../push.lua": "push.lua",
-      "../LuaApp/**/*": "LuaApp/",
+      "../LuaApp/lib": "LuaApp/lib",
+      "../LuaApp/lua_modules": "LuaApp/lua_modules",
       "C:\\lua\\*.exe": "lua/",
       "C:\\lua\\*.dll": "lua/"
     }
