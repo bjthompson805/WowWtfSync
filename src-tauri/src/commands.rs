@@ -157,7 +157,7 @@ pub fn get_config_path(app: AppHandle) -> Result<String, String> {
 }
 
 #[tauri::command]
-pub fn run_push(
+pub async fn run_push(
     app: AppHandle,
     addon: String,
     character: String,
@@ -169,32 +169,40 @@ pub fn run_push(
     let push_lua = find_push_lua(&app)?;
     let lua_exe = find_lua_exe()?;
 
-    let mut cmd = std::process::Command::new(&lua_exe);
-    cmd.arg(&push_lua)
-        .arg(&addon)
-        .arg(&cfg_path_str)
-        .arg(&character);
+    // Spawn the blocking child-process wait onto a thread-pool thread so the
+    // WebView event loop (and therefore the UI) stays responsive on all platforms.
+    // On macOS/Linux the sync version blocked the WKWebView/WebKitGTK event loop,
+    // preventing the button from rendering as disabled until the Lua process finished.
+    tauri::async_runtime::spawn_blocking(move || {
+        let mut cmd = std::process::Command::new(&lua_exe);
+        cmd.arg(&push_lua)
+            .arg(&addon)
+            .arg(&cfg_path_str)
+            .arg(&character);
 
-    // On Windows, a GUI app spawning a console binary (lua.exe) would normally
-    // open a new console window that flashes and steals focus.  CREATE_NO_WINDOW
-    // suppresses it entirely without affecting stdout/stderr capture.
-    #[cfg(target_os = "windows")]
-    {
-        use std::os::windows::process::CommandExt;
-        cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
-    }
+        // On Windows, a GUI app spawning a console binary (lua.exe) would normally
+        // open a new console window that flashes and steals focus.  CREATE_NO_WINDOW
+        // suppresses it entirely without affecting stdout/stderr capture.
+        #[cfg(target_os = "windows")]
+        {
+            use std::os::windows::process::CommandExt;
+            cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+        }
 
-    let output = cmd
-        .output()
-        .map_err(|e| format!("Failed to launch Lua: {}", e))?;
+        let output = cmd
+            .output()
+            .map_err(|e| format!("Failed to launch Lua: {}", e))?;
 
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-        let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-        return Err(if !stderr.is_empty() { stderr } else { stdout });
-    }
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+            let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+            return Err(if !stderr.is_empty() { stderr } else { stdout });
+        }
 
-    Ok(String::from_utf8_lossy(&output.stdout).to_string())
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    })
+    .await
+    .map_err(|e| format!("Thread pool error: {}", e))?
 }
 
 fn find_push_lua(app: &AppHandle) -> Result<PathBuf, String> {

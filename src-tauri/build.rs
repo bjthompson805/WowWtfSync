@@ -373,7 +373,11 @@ fn lua_include_flags() -> Vec<String> {
             let mut candidates: Vec<PathBuf> = entries
                 .flatten()
                 .filter(|e| {
-                    e.file_type().map(|t| t.is_dir()).unwrap_or(false)
+                    // Use fs::metadata (follows symlinks) instead of file_type() (lstat, doesn't).
+                    // /opt/homebrew/include/lua is a symlink to a directory, so file_type()
+                    // would return symlink and is_dir() would be false, causing the header
+                    // directory to be silently skipped.
+                    fs::metadata(e.path()).map(|m| m.is_dir()).unwrap_or(false)
                         && e.file_name()
                             .to_string_lossy()
                             .to_ascii_lowercase()

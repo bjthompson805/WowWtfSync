@@ -3,9 +3,11 @@ dist/
 src-tauri/target/
 src-tauri/gen/
 .env
+*.DS_Store
 
 # Linux and MacOS compilation file
 LuaApp/lua_modules/printTableC.so
+LuaApp/lua_modules/printTableC.so.dSYM/
 
 # Windows dll compilation files
 LuaApp/lua_modules/*.def
