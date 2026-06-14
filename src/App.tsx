@@ -9,10 +9,7 @@ import {
   type CharacterEntry,
   type ConfigCharacter,
   type PushTarget,
-  type Session,
 } from './types';
-import LoginScreen from './components/LoginScreen';
-import AccountMenu from './components/AccountMenu';
 import WtfFolderInput from './components/WtfFolderInput';
 import PushAllBar from './components/PushAllBar';
 import CharactersTable from './components/CharactersTable';
@@ -32,35 +29,6 @@ function toConfigCharacters(list: Character[]): ConfigCharacter[] {
 }
 
 export default function App() {
-  // Auth state
-  const [session, setSession] = useState<Session | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
-
-  useEffect(() => {
-    invoke<Session | null>('auth_get_session')
-      .then(s => { setSession(s ?? null); })
-      .catch(() => {})
-      .finally(() => setAuthChecked(true));
-  }, []);
-
-  const handleLogin = (s: Session) => setSession(s);
-
-  const handleSignOut = async () => {
-    await invoke('auth_logout').catch(() => {});
-    setSession(null);
-  };
-
-  const handleSaveAndSignOut = async () => {
-    try {
-      await invoke('save_config', {
-        config: { wtfPath, characters: toConfigCharacters(characters) },
-      });
-      await invoke('append_log', { keyword: 'ACTION', message: 'Saved character list on sign out' });
-      setSavedCharacters(toConfigCharacters(characters));
-    } catch { /* best-effort */ }
-    await handleSignOut();
-  };
-
   // App state
   const [wtfPath, setWtfPath] = useState('');
   const [characters, setCharacters] = useState<Character[]>([]);
@@ -265,17 +233,8 @@ export default function App() {
     setLastPushStatus(status);
   };
 
-  if (!authChecked) return null;
-  if (!session) return <LoginScreen onLogin={handleLogin} />;
-
   return (
     <div className="app">
-      <AccountMenu
-        session={session}
-        isDirty={isDirty}
-        onSaveAndSignOut={handleSaveAndSignOut}
-        onSignOut={handleSignOut}
-      />
       <WtfFolderInput wtfPath={wtfPath} onApply={handleApply} />
       <PushAllBar onPushAll={addon => requestPush(addon, null)} />
 

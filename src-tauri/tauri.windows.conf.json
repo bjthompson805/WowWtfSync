@@ -2,7 +2,6 @@
   "$schema": "https://schema.tauri.app/config/2",
   "bundle": {
     "resources": {
-      "../THIRD_PARTY_LICENSES.txt": "THIRD_PARTY_LICENSES.txt",
       "../push.lua": "push.lua",
       "../LuaApp/lib": "LuaApp/lib",
       "../LuaApp/lua_modules": "LuaApp/lua_modules",

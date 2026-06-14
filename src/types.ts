@@ -1,30 +1,3 @@
-// Auth / Session types
-
-export interface SessionUser {
-  id: number;
-  username: string;
-  email: string;
-}
-
-export interface Session {
-  accessToken: string;
-  refreshToken: string;
-  user: SessionUser;
-}
-
-// Full account info from GET /api/auth/me
-export interface MeInfo {
-  id: number;
-  username: string;
-  email: string;
-  sub_status: string | null;
-  current_period_end: string | null;
-  cancel_at_period_end: number | null;
-  license_key: string | null;
-}
-
-// App types
-
 export const ADDONS = [
   'Altoholic',
   'Auctionator',
